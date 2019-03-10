@@ -1,12 +1,15 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"github.com/tmortimer/urlfilter/handlers"
+	"github.com/tmortimer/urlfilter/server"
 )
 
 // Conifgure and launch URL filtering service which can be used
 // to check against known malicious URLs.
 func main() {
-    log.Fatal(http.ListenAndServe(":8080", nil))
+	handlers := []handlers.Initializer {
+		handlers.Filter {},
+	}
+    server.Run(handlers)
 }
