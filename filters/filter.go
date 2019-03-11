@@ -1,3 +1,4 @@
+// Chainable filters that can be used by handlers.FilterHandler.
 package filters
 
 // Represents a chainable filter to identify malicious URLs.

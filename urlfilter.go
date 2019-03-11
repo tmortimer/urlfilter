@@ -9,7 +9,7 @@ import (
 // Conifgure and launch URL filtering service which can be used
 // to check against known malicious URLs.
 func main() {
-	handlers := []handlers.Initializer {
+	handlers := []handlers.Handler {
 		&handlers.FilterHandler {
 			Filter: &filters.Fake {},
 		},

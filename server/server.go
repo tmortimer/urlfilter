@@ -1,3 +1,4 @@
+// Main urlfilter server.
 package server
 
 import (
@@ -7,7 +8,7 @@ import (
 )
 
 // Initializes REST API handlers and launch the server.
-func Run(handlers []handlers.Initializer) {
+func Run(handlers []handlers.Handler) {
 	for _, handler := range handlers {
 		handler.Init()
 	}
