@@ -13,6 +13,6 @@ func Run(handlers []handlers.Initializer) {
 	}
 
 	// ListenAndServe launches a goroutine for each connection,
-	// so no additional handling necessary to get some concurrency.
+	// so no additional handling necessary to get some concurrency.git
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
