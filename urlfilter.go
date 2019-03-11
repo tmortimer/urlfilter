@@ -11,7 +11,7 @@ import (
 func main() {
 	handlers := []handlers.Handler {
 		&handlers.FilterHandler {
-			Filter: &filters.Fake {},
+			Filter: &filters.Fake{},
 		},
 	}
 
