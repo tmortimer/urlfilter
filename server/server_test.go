@@ -1,8 +1,8 @@
 package server
 
 import (
-	"testing"
 	"github.com/tmortimer/urlfilter/handlers"
+	"testing"
 )
 
 type TestHandler struct {
@@ -18,31 +18,31 @@ type TestServer struct {
 }
 
 func (s *TestServer) ListenAndServe() error {
-	s.called++;
+	s.called++
 	return nil
 }
 
 func TestRunCallsHandlersStartsServer(t *testing.T) {
 	h := &TestHandler{}
 	h2 := &TestHandler{}
-	handlers := []handlers.Handler {
+	handlers := []handlers.Handler{
 		h,
 		h2,
 	}
 
 	s := &TestServer{}
 
-    Run(handlers, s)
+	Run(handlers, s)
 
-    if h.called != 1 {
-    	t.Errorf("The TestHandler Init function was called %d time(s).", h.called)
-    }
+	if h.called != 1 {
+		t.Errorf("The TestHandler Init function was called %d time(s).", h.called)
+	}
 
-    if h2.called != 1 {
-    	t.Errorf("The TestHandler2 Init function was called %d time(s).", h2.called)
-    }
+	if h2.called != 1 {
+		t.Errorf("The TestHandler2 Init function was called %d time(s).", h2.called)
+	}
 
-    if s.called != 1 {
-    	t.Errorf("The TestServer ListenAndServe function was called %d time(s).", s.called)
-    }
+	if s.called != 1 {
+		t.Errorf("The TestServer ListenAndServe function was called %d time(s).", s.called)
+	}
 }

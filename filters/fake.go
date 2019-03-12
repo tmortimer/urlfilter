@@ -5,7 +5,7 @@ import (
 )
 
 // A Fake filter used for testing and setup.
-type Fake struct {}
+type Fake struct{}
 
 // Since this filter is full of lies it does nothing
 // with any secondary filter chaning anyways.

@@ -2,8 +2,8 @@
 package server
 
 import (
-	"log"
 	"github.com/tmortimer/urlfilter/handlers"
+	"log"
 )
 
 type HTTPServer interface {

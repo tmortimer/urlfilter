@@ -5,14 +5,14 @@ import (
 	"testing"
 )
 
-var containsURL = []string {
+var containsURL = []string{
 	"www.facebook.com/wjwjw/wdqwd",
 	"facebook.com/pewpewpew",
 	"www.google.ca/facebook/facechew",
 	"www.google.ca/facebook",
 }
 
-var doesNotContainURL = []string {
+var doesNotContainURL = []string{
 	"www.facehook.com",
 	"cisco.com/facehok",
 	"www.netapp.com",

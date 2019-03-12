@@ -1,15 +1,15 @@
 package handlers
 
 import (
-    "net/http"
-    "net/http/httptest"
-	"testing"
 	"github.com/tmortimer/urlfilter/filters"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 type TestFilter struct {
 	secondary filters.Filter
-	called int
+	called    int
 }
 
 func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) {
@@ -38,23 +38,23 @@ func TestHandlesSafeURL(t *testing.T) {
 	f.AddSecondaryFilter(&filters.Fake{})
 	h := NewFilterHandler(f)
 
-	req, err := http.NewRequest("GET", FILTER_ENDPOINT + "www.google.ca", nil)
-    if err != nil {
-        t.Fatalf(err.Error())
-    }
+	req, err := http.NewRequest("GET", FILTER_ENDPOINT+"www.google.ca", nil)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 
-    recorder := httptest.NewRecorder()
-    handler := http.HandlerFunc(h.filterHandler)
+	recorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(h.filterHandler)
 
-    handler.ServeHTTP(recorder, req)
+	handler.ServeHTTP(recorder, req)
 
-    if f.called != 1 {
-    	t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
-    }
+	if f.called != 1 {
+		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
+	}
 
-    if recorder.Code != http.StatusOK {
-    	t.Errorf("The filterHandler function %s when OK was expected.", http.StatusText(recorder.Code))
-    }
+	if recorder.Code != http.StatusOK {
+		t.Errorf("The filterHandler function %s when OK was expected.", http.StatusText(recorder.Code))
+	}
 }
 
 func TestHandlesBlockedURL(t *testing.T) {
@@ -64,21 +64,21 @@ func TestHandlesBlockedURL(t *testing.T) {
 	f.AddSecondaryFilter(&filters.Fake{})
 	h := NewFilterHandler(f)
 
-	req, err := http.NewRequest("GET", FILTER_ENDPOINT + "www.facebook.ca", nil)
-    if err != nil {
-        t.Fatalf(err.Error())
-    }
+	req, err := http.NewRequest("GET", FILTER_ENDPOINT+"www.facebook.ca", nil)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 
-    recorder := httptest.NewRecorder()
-    handler := http.HandlerFunc(h.filterHandler)
+	recorder := httptest.NewRecorder()
+	handler := http.HandlerFunc(h.filterHandler)
 
-    handler.ServeHTTP(recorder, req)
+	handler.ServeHTTP(recorder, req)
 
-    if f.called != 1 {
-    	t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
-    }
+	if f.called != 1 {
+		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
+	}
 
-    if recorder.Code != http.StatusLocked {
-    	t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
-    }
+	if recorder.Code != http.StatusLocked {
+		t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
+	}
 }
