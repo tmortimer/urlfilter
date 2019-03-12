@@ -11,10 +11,10 @@ type Fake struct {}
 // with any secondary filter chaning anyways.
 func (f *Fake) AddSecondaryFilter(filter Filter) {}
 
-// Returns true if the url contains facebook.com anywhere in it,
+// Returns true if the url contains facebook anywhere in it,
 // because that's as good as anything to block.
 func (f *Fake) ContainsURL(url string) bool {
-	if strings.Contains(url, "facebook.com") {
+	if strings.Contains(url, "facebook") {
 		return true
 	}
 

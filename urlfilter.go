@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"github.com/tmortimer/urlfilter/filters"
 	"github.com/tmortimer/urlfilter/handlers"
 	"github.com/tmortimer/urlfilter/server"
@@ -10,10 +11,8 @@ import (
 // to check against known malicious URLs.
 func main() {
 	handlers := []handlers.Handler {
-		&handlers.FilterHandler {
-			Filter: &filters.Fake{},
-		},
+		handlers.NewFilterHandler(&filters.Fake{}),
 	}
 
-    server.Run(handlers)
+    server.Run(handlers, &http.Server{Addr: ":8080"})
 }

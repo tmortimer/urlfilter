@@ -14,3 +14,7 @@
 # Emacs backup files
 *~
 \#*\#
+
+# Apple
+.DS_Store
+ 
