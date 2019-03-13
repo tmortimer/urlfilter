@@ -7,6 +7,11 @@ import (
 // A Fake filter used for testing and setup.
 type Fake struct{}
 
+// Create a new Fake filter.
+func NewFake() *Fake {
+	return &Fake{}
+}
+
 // Since this filter is full of lies it does nothing
 // with any secondary filter chaning anyways.
 func (f *Fake) AddSecondaryFilter(filter Filter) {}

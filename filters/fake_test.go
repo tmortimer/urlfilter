@@ -19,15 +19,15 @@ var doesNotContainURL = []string{
 }
 
 func TestAddSecondaryFilterDoesNothing(t *testing.T) {
-	f := Fake{}
-	f.AddSecondaryFilter(&Fake{})
-	if !cmp.Equal(f, Fake{}) {
+	f := NewFake()
+	f.AddSecondaryFilter(NewFake())
+	if !cmp.Equal(*f, *NewFake()) {
 		t.Fatalf("Fake AddSecondaryFilter affected the filter... somehow.")
 	}
 }
 
 func TestContainsURLContains(t *testing.T) {
-	f := Fake{}
+	f := NewFake()
 	for _, url := range containsURL {
 		if !f.ContainsURL(url) {
 			t.Errorf("URL \"%s\" was incorrectly missed by the filter.", url)
@@ -36,7 +36,7 @@ func TestContainsURLContains(t *testing.T) {
 }
 
 func TestContainsURLDoesNotContain(t *testing.T) {
-	f := Fake{}
+	f := NewFake()
 	for _, url := range doesNotContainURL {
 		if f.ContainsURL(url) {
 			t.Errorf("URL \"%s\" was incorrectly flagged by the filter.", url)

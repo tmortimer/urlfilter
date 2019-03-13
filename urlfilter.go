@@ -11,7 +11,7 @@ import (
 // to check against known malicious URLs.
 func main() {
 	handlers := []handlers.Handler{
-		handlers.NewFilterHandler(&filters.Fake{}),
+		handlers.NewFilterHandler(filters.NewFake()),
 	}
 
 	server.Run(handlers, &http.Server{Addr: ":8080"})
