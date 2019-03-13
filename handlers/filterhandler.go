@@ -12,6 +12,7 @@ type FilterHandler struct {
 	filter filters.Filter
 }
 
+// Create a FilterHandler instance with the underlying filters.Filter chain.
 func NewFilterHandler(filter filters.Filter) *FilterHandler {
 	return &FilterHandler{filter: filter}
 }

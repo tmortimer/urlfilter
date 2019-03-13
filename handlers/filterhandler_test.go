@@ -23,7 +23,7 @@ func (f *TestFilter) ContainsURL(url string) bool {
 
 func TestInitAddsHandlers(t *testing.T) {
 	f := &TestFilter{}
-	f.AddSecondaryFilter(&filters.Fake{})
+	f.AddSecondaryFilter(filters.NewFake())
 	h := NewFilterHandler(f)
 
 	// So it doesn't fail, but how can I (directly) test that it actually registered...
@@ -35,7 +35,7 @@ func TestHandlesSafeURL(t *testing.T) {
 	// https://blog.questionable.services/article/testing-http-handlers-go/
 	// This page was useful for info on how to test http handlers in Go.
 	f := &TestFilter{}
-	f.AddSecondaryFilter(&filters.Fake{})
+	f.AddSecondaryFilter(filters.NewFake())
 	h := NewFilterHandler(f)
 
 	req, err := http.NewRequest("GET", FILTER_ENDPOINT+"www.google.ca", nil)
@@ -61,7 +61,7 @@ func TestHandlesBlockedURL(t *testing.T) {
 	// https://blog.questionable.services/article/testing-http-handlers-go/
 	// This page was useful for info on how to test http handlers in Go.
 	f := &TestFilter{}
-	f.AddSecondaryFilter(&filters.Fake{})
+	f.AddSecondaryFilter(filters.NewFake())
 	h := NewFilterHandler(f)
 
 	req, err := http.NewRequest("GET", FILTER_ENDPOINT+"www.facebook.ca", nil)
