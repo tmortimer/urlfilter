@@ -1,6 +1,6 @@
 package config
 
-//
+// Redis config for urlfilter.
 type RedisConfig struct {
 	Host     string `json:"host"`
 	Port     string `json:"port"`
