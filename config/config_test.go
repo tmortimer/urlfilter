@@ -26,6 +26,10 @@ func TestNewRedisConfigDefaults(t *testing.T) {
 func TestNewConfig(t *testing.T) {
 	config := NewConfig()
 
+	if config.Host != "" {
+		t.Errorf("The Host should be empty but was %s.", config.Port)
+	}
+
 	if config.Port != "8080" {
 		t.Errorf("The Port should be 8080 but was %s.", config.Port)
 	}
@@ -39,6 +43,7 @@ func TestNewConfig(t *testing.T) {
 
 func TestParseConfig(t *testing.T) {
 	config := NewConfig()
+	config.Host = "google.ca"
 	config.Port = "6060"
 	config.Redis.Host = "google.ca"
 	config.Redis.Port = "444"

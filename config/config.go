@@ -10,6 +10,7 @@ import (
 
 // All config for urlfilter.
 type Config struct {
+	Host  string      `json:"host"`
 	Port  string      `json:"port"`
 	Redis RedisConfig `json:"redis"`
 }
@@ -17,6 +18,7 @@ type Config struct {
 // Return Config with default values.
 func NewConfig() *Config {
 	return &Config{
+		Host:  "",
 		Port:  "8080",
 		Redis: NewRedisConfig(),
 	}
