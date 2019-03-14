@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-func TestNewRedisConfigDefaults(t *testing.T) {
-	redis := NewRedisConfig()
+func TestNewRedisDefaults(t *testing.T) {
+	redis := NewRedis()
 
-	if redis.Host != "localhost" {
-		t.Errorf("Redis.Hostname should be localhost but was %s.", redis.Host)
+	if redis.Host != "" {
+		t.Errorf("Redis.Hostname should be empty but was %s.", redis.Host)
 	}
 
 	if redis.Port != "6379" {
@@ -34,7 +34,7 @@ func TestNewConfig(t *testing.T) {
 		t.Errorf("The Port should be 8080 but was %s.", config.Port)
 	}
 
-	redis := NewRedisConfig()
+	redis := NewRedis()
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
 		t.Error(cmp.Diff(config.Redis, redis))

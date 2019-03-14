@@ -12,7 +12,7 @@ import (
 type Config struct {
 	Host  string      `json:"host"`
 	Port  string      `json:"port"`
-	Redis RedisConfig `json:"redis"`
+	Redis Redis `json:"redis"`
 }
 
 // Return Config with default values.
@@ -20,7 +20,7 @@ func NewConfig() *Config {
 	return &Config{
 		Host:  "",
 		Port:  "8080",
-		Redis: NewRedisConfig(),
+		Redis: NewRedis(),
 	}
 }
 

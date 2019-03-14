@@ -8,17 +8,17 @@ import (
 )
 
 type TestFilter struct {
-	secondary filters.Filter
+	next filters.Filter
 	called    int
 }
 
 func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) {
-	f.secondary = filter
+	f.next = filter
 }
 
 func (f *TestFilter) ContainsURL(url string) bool {
 	f.called++
-	return f.secondary.ContainsURL(url)
+	return f.next.ContainsURL(url)
 }
 
 func TestInitAddsHandlers(t *testing.T) {
