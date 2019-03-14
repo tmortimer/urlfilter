@@ -20,9 +20,13 @@ func NewFilterHandler(filter filters.Filter) *FilterHandler {
 // Handles URL filtering requests.
 func (f *FilterHandler) filterHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.RequestURI()[len(FILTER_ENDPOINT):]
-	if f.filter.ContainsURL(url) {
+	contains, err := f.filter.ContainsURL(url)
+	if err != nil {
+		//TOM needs something more usefule here.
+		w.WriteHeader(http.StatusInternalServerError)
+	} else if contains {
 		// Return negative response, URL is banned.
-		// Not settled on API yet, just use this code to indicate error.
+		//TOM Not settled on API yet, just use this code to indicate error.
 		w.WriteHeader(http.StatusLocked)
 	}
 	// Return positive response.

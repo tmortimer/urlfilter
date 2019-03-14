@@ -10,9 +10,9 @@ import (
 
 // All config for urlfilter.
 type Config struct {
-	Host  string      `json:"host"`
-	Port  string      `json:"port"`
-	Redis Redis `json:"redis"`
+	Host  string `json:"host"`
+	Port  string `json:"port"`
+	Redis Redis  `json:"redis"`
 }
 
 // Return Config with default values.

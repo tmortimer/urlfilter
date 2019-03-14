@@ -8,5 +8,5 @@ type Filter interface {
 	AddSecondaryFilter(filter Filter)
 
 	// Check if the URL is contained in the filter.
-	ContainsURL(url string) bool
+	ContainsURL(url string) (bool, error)
 }
