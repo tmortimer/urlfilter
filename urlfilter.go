@@ -16,8 +16,10 @@ func main() {
 	flag.Parse()
 	config := config.ParseConfigFile(*configPath)
 
+	redisFilter := filters.NewRedis(config.Redis)
+	redisFilter.ConnectToRedis()
 	handlers := []handlers.Handler{
-		handlers.NewFilterHandler(filters.NewFake()),
+		handlers.NewFilterHandler(redisFilter),
 	}
 
 	server.Run(handlers, &http.Server{Addr: config.Host + ":" + config.Port})

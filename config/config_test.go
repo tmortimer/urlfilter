@@ -21,6 +21,23 @@ func TestNewRedisDefaults(t *testing.T) {
 	if redis.Password != "" {
 		t.Errorf("Redis.Password should be empty but was %s.", redis.Password)
 	}
+
+	if redis.MaxIdle != 10 {
+		t.Errorf("Redis.MaxIdle should be 10 but was %d.", redis.MaxIdle)
+	}
+
+	if redis.IdleTimeout != 600 {
+		t.Errorf("Redis.MaxIdle should be 600 but was %d.", redis.IdleTimeout)
+	}
+
+	if len(redis.Config) > 0 {
+		t.Errorf("Redis.Config should be empty but was not should be 600 but was %v.", redis.Config)
+	}
+
+	if redis.InsertChunkSize != 1000 {
+		t.Errorf("Redis.InsertChunkSize should be 1000 but was %d.", redis.InsertChunkSize)
+	}
+
 }
 
 func TestNewConfig(t *testing.T) {
