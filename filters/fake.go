@@ -28,5 +28,9 @@ func (f *Fake) ContainsURL(url string) (bool, error) {
 		return false, errors.New("Bad things happened!")
 	}
 
+	if strings.Contains(url, "faceface") {
+		return true, errors.New("Bad things happened!")
+	}
+
 	return false, nil
 }

@@ -25,6 +25,13 @@ var errorsURL = []string{
 	"www.google.ca/bookface",
 }
 
+var errorsContainsURL = []string{
+	"www.faceface.com/wjwjw/wdqwd",
+	"faceface.com/pewpewpew",
+	"www.google.ca/faceface/facechew",
+	"www.google.ca/faceface",
+}
+
 func TestAddSecondaryFilterDoesNothing(t *testing.T) {
 	f := NewFake()
 	f.AddSecondaryFilter(NewFake())
@@ -66,6 +73,19 @@ func TestContainsURLGeneratesError(t *testing.T) {
 		contains, err := f.ContainsURL(url)
 		if contains {
 			t.Errorf("URL \"%s\" was incorrectly flagged by the filter.", url)
+		}
+		if err == nil {
+			t.Error("An error was not generated when one was expected.")
+		}
+	}
+}
+
+func TestContainsURLGeneratesErrorStillFound(t *testing.T) {
+	f := NewFake()
+	for _, url := range errorsContainsURL {
+		contains, err := f.ContainsURL(url)
+		if !contains {
+			t.Errorf("URL \"%s\" was incorrectly missed by the filter.", url)
 		}
 		if err == nil {
 			t.Error("An error was not generated when one was expected.")

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/tmortimer/urlfilter/config"
+	"github.com/tmortimer/urlfilter/connectors"
 	"github.com/tmortimer/urlfilter/filters"
 	"github.com/tmortimer/urlfilter/handlers"
 	"github.com/tmortimer/urlfilter/server"
@@ -16,8 +17,7 @@ func main() {
 	flag.Parse()
 	config := config.ParseConfigFile(*configPath)
 
-	redisFilter := filters.NewRedis(config.Redis)
-	redisFilter.ConnectToRedis()
+	redisFilter := filters.NewDB(connectors.NewRedis(config.Redis))
 	handlers := []handlers.Handler{
 		handlers.NewFilterHandler(redisFilter),
 	}

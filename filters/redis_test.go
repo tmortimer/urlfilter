@@ -1,6 +1,0 @@
-package filters
-
-import (
-	"testing"
-)
-
