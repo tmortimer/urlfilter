@@ -32,8 +32,8 @@ func NewConfig() *Config {
 	return &Config{
 		Host:    "",
 		Port:    "8080",
-		Redis:   NewRedis(),
 		Filters: []string{"redis"},
+		Redis:   NewRedis(),
 	}
 }
 
