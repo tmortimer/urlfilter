@@ -24,7 +24,7 @@ type Redis struct {
 	InsertChunkSize int `json:"insertChunkSize"`
 }
 
-// Return a Redis config with default values.
+// Return Redis config with default values.
 func NewRedis() Redis {
 	return Redis{
 		Host:            "",
