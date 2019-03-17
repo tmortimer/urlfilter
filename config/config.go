@@ -16,6 +16,12 @@ type Config struct {
 	// Port to bind server to - default 8080.
 	Port string `json:"port"`
 
+	// Filter chain. Filters are called left to right - default ["redis"].
+	// Valid options are: redis, fake, redisCache. The right most item
+	// can not be a "Cache", anything earlier in the list _must_ be a
+	// "Cache"
+	Filters []string `json:"filters"`
+
 	// Config for Redis.
 	Redis Redis `json:"redis"`
 }
@@ -26,6 +32,7 @@ func NewConfig() *Config {
 		Host:  "",
 		Port:  "8080",
 		Redis: NewRedis(),
+		Filters: []string{"redis"},
 	}
 }
 

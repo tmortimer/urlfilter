@@ -51,6 +51,10 @@ func TestNewConfig(t *testing.T) {
 		t.Errorf("The Port should be 8080 but was %s.", config.Port)
 	}
 
+	if strings.Compare(config.Filters[0], "redis") != 0 || len(config.Filters) != 1 {
+		t.Errorf("The Filters list should be [\"redis\"] but was %v.", config.Filters)
+	}
+
 	redis := NewRedis()
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
