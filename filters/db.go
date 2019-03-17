@@ -32,6 +32,7 @@ func (d *DB) AddSecondaryFilter(filter Filter) {
 // If the database generates an error and this is only a cache we can continue down the
 // filter chain, since each subsequent level should have better information.
 func (d *DB) ContainsURL(url string) (bool, error) {
+	//TOM error information is lost here on subsequent steps.
 	found, err := d.conn.ContainsURL(url)
 	if err != nil {
 		log.Printf("%s generated an the error %s when checking for %s.", d.conn.Name(), err.Error(), url)

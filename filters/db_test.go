@@ -124,7 +124,7 @@ func TestContainsURLFoundWSecondary(t *testing.T) {
 	}
 }
 
-func TestContainsURLNotFoundWSecondaryNotFound(t *testing.T) {
+func TestContainsURLNotFoundWNotFoundSecondary(t *testing.T) {
 	url := "werpwerp.com"
 	db := NewDB(NewTestConnector())
 	db.AddSecondaryFilter(NewFake())
@@ -139,7 +139,7 @@ func TestContainsURLNotFoundWSecondaryNotFound(t *testing.T) {
 	}
 }
 
-func TestContainsURLNotFoundWSecondaryFound(t *testing.T) {
+func TestContainsURLNotFoundWFoundSecondary(t *testing.T) {
 	url := "facebook.com"
 	conn := NewTestConnector()
 	db := NewDB(conn)
@@ -160,10 +160,123 @@ func TestContainsURLNotFoundWSecondaryFound(t *testing.T) {
 	}
 }
 
-// Error in primary, found in secondary, added to cache
-// Error in primary, found in primary
-// Error in primary, error in secondary, found in secondary
-// Error in primary, error in secondary, not found in secondary
-// Not found in primary, not found in secondary, error in secondary
-// not found in primary, found in secondary, error in secondary
-// not found in primary, found in secondary, error adding to primary
+func TestContainsURLNotFoundErrorWFoundSecondary(t *testing.T) {
+	url := "facebook.com/merp"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, _ := db.ContainsURL(url)
+
+	if !found {
+		t.Errorf("URL \"%s\" was not returned by the filter.", url)
+	}
+	/* Need to not lose error information here on subsequent stems
+	//TOM
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}*/
+
+	// Should be added to the cache now
+	if !conn.db[url] {
+		t.Errorf("URL \"%s\" was not added to the cache.", url)
+	}
+}
+
+func TestContainsURLNotFoundErrorWFoundSecondaryError(t *testing.T) {
+	url := "facebook.com/derp"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, err := db.ContainsURL(url)
+
+	if !found {
+		t.Errorf("URL \"%s\" was not returned by the filter.", url)
+	}
+
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}
+}
+
+func TestContainsURLNotFoundErrorWErrorInSecondary(t *testing.T) {
+	url := "bookface.com/merp"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, err := db.ContainsURL(url)
+
+	if found {
+		t.Errorf("URL \"%s\" was incorrectly returned by the filter.", url)
+	}
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}
+}
+
+func TestContainsURLNotFoundWErrorInSecondary(t *testing.T) {
+	url := "bookface.com"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, err := db.ContainsURL(url)
+
+	if found {
+		t.Errorf("URL \"%s\" was incorrectly returned by the filter.", url)
+	}
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}
+
+	// Should not be in the cache
+	if conn.db[url] {
+		t.Errorf("URL \"%s\" added to the cache when it was not supposed to be.", url)
+	}
+}
+
+func TestContainsURLNotFoundWFoundSecondaryErrorInSecondary(t *testing.T) {
+	url := "faceface.com"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, _ := db.ContainsURL(url)
+
+	if !found {
+		t.Errorf("URL \"%s\" was not returned by the filter.", url)
+	}
+	/* Need to not lose error information here on subsequent stems
+	//TOM
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}*/
+
+	// Should be added to the cache now
+	if !conn.db[url] {
+		t.Errorf("URL \"%s\" was not added to the cache.", url)
+	}
+}
+
+func TestContainsURLNotFoundWFoundSecondaryErrorAddingToCache(t *testing.T) {
+	url := "facebook.com/perm"
+	conn := NewTestConnector()
+	db := NewDB(conn)
+	db.AddSecondaryFilter(NewFake())
+
+	found, err := db.ContainsURL(url)
+
+	if !found {
+		t.Errorf("URL \"%s\" was not returned by the filter.", url)
+	}
+	if err == nil {
+		t.Error("An error was not generated when one was expected.")
+	}
+
+	// Should not be in the cache
+	if conn.db[url] {
+		t.Errorf("URL \"%s\" added to the cache when it was not supposed to be.", url)
+	}
+}
