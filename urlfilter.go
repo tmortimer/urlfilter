@@ -7,6 +7,7 @@ import (
 	"github.com/tmortimer/urlfilter/filters"
 	"github.com/tmortimer/urlfilter/handlers"
 	"github.com/tmortimer/urlfilter/server"
+	"log"
 	"net/http"
 )
 
@@ -15,7 +16,10 @@ import (
 func main() {
 	configPath := flag.String("config", "", "Path to config file.")
 	flag.Parse()
-	config := config.ParseConfigFile(*configPath)
+	config, err := config.ParseConfigFile(*configPath)
+	if err != nil {
+		log.Fatalf("Unable to load config: %s", err)
+	}
 
 	redisFilter := filters.NewDB(connectors.NewRedis(config.Redis))
 	handlers := []handlers.Handler{
