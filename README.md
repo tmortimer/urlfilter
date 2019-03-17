@@ -10,5 +10,5 @@ github.com/gomodule/redigo/redis
 # Testing
 Run **go test ./..** to run unit tests.
 
-# Generate Documentation
-Run **godoc -http=localhost:6060** and then navigating to **http://localhost:6060/pkg/github.com/tmortimer/urlfilter/**.
+# Docs
+[![GoDoc](https://godoc.org/github.com/tmortimer/urlfilter?status.svg)](https://godoc.org/github.com/tmortimer/urlfilter)
