@@ -4,6 +4,7 @@ REST service to filter malicious URLs.
 # Requirements
 ```
 github.com/google/go-cmp/cmp
+github.com/gomodule/redigo/redis
 ```
 
 # Testing

@@ -6,7 +6,9 @@ import (
 	"log"
 )
 
+// HTTP Server Interface, backs the main server instance.
 type HTTPServer interface {
+	// Start the server.
 	ListenAndServe() error
 }
 

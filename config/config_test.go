@@ -7,11 +7,11 @@ import (
 	"testing"
 )
 
-func TestNewRedisConfigDefaults(t *testing.T) {
-	redis := NewRedisConfig()
+func TestNewRedisDefaults(t *testing.T) {
+	redis := NewRedis()
 
-	if redis.Host != "localhost" {
-		t.Errorf("Redis.Hostname should be localhost but was %s.", redis.Host)
+	if redis.Host != "" {
+		t.Errorf("Redis.Hostname should be empty but was %s.", redis.Host)
 	}
 
 	if redis.Port != "6379" {
@@ -21,6 +21,23 @@ func TestNewRedisConfigDefaults(t *testing.T) {
 	if redis.Password != "" {
 		t.Errorf("Redis.Password should be empty but was %s.", redis.Password)
 	}
+
+	if redis.MaxIdle != 10 {
+		t.Errorf("Redis.MaxIdle should be 10 but was %d.", redis.MaxIdle)
+	}
+
+	if redis.IdleTimeout != 600 {
+		t.Errorf("Redis.MaxIdle should be 600 but was %d.", redis.IdleTimeout)
+	}
+
+	if len(redis.Config) > 0 {
+		t.Errorf("Redis.Config should be empty but was not should be 600 but was %v.", redis.Config)
+	}
+
+	if redis.InsertChunkSize != 1000 {
+		t.Errorf("Redis.InsertChunkSize should be 1000 but was %d.", redis.InsertChunkSize)
+	}
+
 }
 
 func TestNewConfig(t *testing.T) {
@@ -34,7 +51,7 @@ func TestNewConfig(t *testing.T) {
 		t.Errorf("The Port should be 8080 but was %s.", config.Port)
 	}
 
-	redis := NewRedisConfig()
+	redis := NewRedis()
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
 		t.Error(cmp.Diff(config.Redis, redis))

@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"errors"
 	"strings"
 )
 
@@ -18,10 +19,18 @@ func (f *Fake) AddSecondaryFilter(filter Filter) {}
 
 // Returns true if the url contains facebook anywhere in it,
 // because that's as good as anything to block.
-func (f *Fake) ContainsURL(url string) bool {
+func (f *Fake) ContainsURL(url string) (bool, error) {
 	if strings.Contains(url, "facebook") {
-		return true
+		return true, nil
 	}
 
-	return false
+	if strings.Contains(url, "bookface") {
+		return false, errors.New("Bad things happened!")
+	}
+
+	if strings.Contains(url, "faceface") {
+		return true, errors.New("Bad things happened!")
+	}
+
+	return false, nil
 }
