@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/tmortimer/urlfilter/filters"
+	"log"
 	"net/http"
 )
 
@@ -33,8 +34,10 @@ func (f *FilterHandler) filterHandler(w http.ResponseWriter, r *http.Request) {
 		// Return negative response, URL is banned.
 		//TOM Not settled on API yet, just use this code to indicate error.
 		w.WriteHeader(http.StatusLocked)
+	} else {
+		log.Printf("URL %s not found in the filter.", url)
+		// Return positive response.
 	}
-	// Return positive response.
 }
 
 // Initialize URL filter API.

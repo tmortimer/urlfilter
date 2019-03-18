@@ -39,6 +39,12 @@ func (d *DB) ContainsURL(url string) (bool, error) {
 	}
 
 	if found || d.next == nil {
+		if found && d.next != nil {
+			log.Printf("URL %s found in %s cache.", url, d.conn.Name())
+		} else if found && d.next == nil {
+			log.Printf("URL %s found in %s.", url, d.conn.Name())
+		}
+
 		return found, err
 	}
 
@@ -47,6 +53,7 @@ func (d *DB) ContainsURL(url string) (bool, error) {
 
 	if found {
 		// Add it to the cache.
+		log.Printf("Adding URL %s to %s cache.", url, d.conn.Name())
 		err = d.conn.AddURL(url)
 		if err != nil {
 			log.Printf("%s generated an the error %s when adding %s.", d.conn.Name(), err.Error(), url)
