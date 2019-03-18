@@ -1,0 +1,27 @@
+version: "2"
+
+services:
+  urlfilter-redis-only:
+    image: golang:latest
+    volumes:
+      - ..:/go/src/github.com/tmortimer/urlfilter
+    working_dir: /go/src/github.com/tmortimer/urlfilter
+    depends_on:
+      - urlfilter-redis-only-redis
+    ports:
+      - 8080:8080
+    command: >
+      sh -c "go get
+             go run urlfilter.go --config=configs/redis-only.json"
+
+  urlfilter-redis-only-redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+
+volumes:  
+  redis_data:
+
+
