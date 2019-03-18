@@ -17,7 +17,7 @@ docker-compose -f docker/docker-compose-fake.yaml up -d\
 ...\
 docker-compose -f docker/docker-compose-redis.yaml logs urlfilter-fake-only\
 ...\
-docker-compose -f docker/docker-compose-fake.yaml stop
+docker-compose -f docker/docker-compose-fake.yaml stop\
 ...\
 docker-compose -f docker/docker-compose-fake.yaml down
 
@@ -26,7 +26,7 @@ docker-compose -f docker/docker-compose-redis.yaml up -d\
 ...\
 docker-compose -f docker/docker-compose-redis.yaml logs urlfilter-redis-only\
 ...\
-docker-compose -f docker/docker-compose-redis.yaml stop
+docker-compose -f docker/docker-compose-redis.yaml stop\
 ...\
 docker-compose -f docker/docker-compose-redis.yaml down
 
