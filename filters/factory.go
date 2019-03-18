@@ -6,6 +6,8 @@ import (
 	"github.com/tmortimer/urlfilter/connectors"
 )
 
+// Generage a chain of URL filter caches and then a final url
+// store based on the provided config.
 func FilterFactory(config *config.Config) (Filter, error) {
 	list := config.Filters
 	var filter Filter = nil
@@ -24,6 +26,7 @@ func FilterFactory(config *config.Config) (Filter, error) {
 	return filter, nil
 }
 
+// Create each filter in the filter chain.
 func CreateFilter(name string, config *config.Config) (Filter, error) {
 	switch name {
 	case "fake":
