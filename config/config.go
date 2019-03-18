@@ -3,8 +3,8 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
@@ -16,34 +16,55 @@ type Config struct {
 	// Port to bind server to - default 8080.
 	Port string `json:"port"`
 
+	// Filter chain. Filters are called left to right - default ["redis"].
+	// Valid options are: redis and fake.
+	Filters []string `json:"filters"`
+
 	// Config for Redis.
 	Redis Redis `json:"redis"`
 }
 
+// Valid Filters to use as Cache
+var validFilters = map[string]bool{"redis": true, "fake": true}
+
 // Return Config with default values.
 func NewConfig() *Config {
 	return &Config{
-		Host:  "",
-		Port:  "8080",
-		Redis: NewRedis(),
+		Host:    "",
+		Port:    "8080",
+		Filters: []string{"redis"},
+		Redis:   NewRedis(),
 	}
 }
 
 // Open the config file at path and parse it.
-func ParseConfigFile(path string) *Config {
+func ParseConfigFile(path string) (*Config, error) {
 	configFile, err := os.Open(path)
 	defer configFile.Close()
 	if path != "" && err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	return ParseConfig(configFile)
 }
 
+// Validate the config.
+func ValidateConfig(config *Config) error {
+	for i := 0; i < len(config.Filters); i++ {
+		if !validFilters[config.Filters[i]] {
+			//TOM only returns the first error.
+			return fmt.Errorf("%s is not a valid filter, the only valid options are %v", config.Filters[i], validFilters)
+		}
+	}
+	return nil
+}
+
 // Parse the config.
-func ParseConfig(reader io.Reader) *Config {
+func ParseConfig(reader io.Reader) (*Config, error) {
 	config := NewConfig()
 	jsonParser := json.NewDecoder(reader)
 	jsonParser.Decode(&config)
-	return config
+
+	err := ValidateConfig(config)
+	return config, err
 }

@@ -51,6 +51,10 @@ func TestNewConfig(t *testing.T) {
 		t.Errorf("The Port should be 8080 but was %s.", config.Port)
 	}
 
+	if strings.Compare(config.Filters[0], "redis") != 0 || len(config.Filters) != 1 {
+		t.Errorf("The Filters list should be [\"redis\"] but was %v.", config.Filters)
+	}
+
 	redis := NewRedis()
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
@@ -62,15 +66,25 @@ func TestParseConfig(t *testing.T) {
 	config := NewConfig()
 	config.Host = "google.ca"
 	config.Port = "6060"
+	config.Filters = []string{"redis", "fake"}
+
 	config.Redis.Host = "google.ca"
 	config.Redis.Port = "444"
 	config.Redis.Password = "Changeme"
+	config.Redis.MaxIdle = 100
+	config.Redis.IdleTimeout = 4
+	config.Redis.Config = []string{"run some things"}
+	config.Redis.InsertChunkSize = 1
 
 	configBytes, err := json.Marshal(config)
 	if err != nil {
 		t.Fatal("Failed to create JSON string from config.Config")
 	}
-	parsedConfig := ParseConfig(strings.NewReader(string(configBytes)))
+
+	parsedConfig, err := ParseConfig(strings.NewReader(string(configBytes)))
+	if err != nil {
+		t.Fatalf("Config validation failed: %s", err)
+	}
 
 	if !cmp.Equal(parsedConfig, config) {
 		t.Error("The parsed config did not match the input config.")
@@ -78,9 +92,24 @@ func TestParseConfig(t *testing.T) {
 	}
 }
 
+func TestValidateConfigFailure(t *testing.T) {
+	config := NewConfig()
+	config.Filters = []string{"redis", "merp", "fake"}
+
+	configBytes, err := json.Marshal(config)
+	if err != nil {
+		t.Fatal("Failed to create JSON string from config.Config")
+	}
+
+	_, err = ParseConfig(strings.NewReader(string(configBytes)))
+	if err == nil {
+		t.Fatalf("Config validation failed was supposed to fail but didn't.")
+	}
+}
+
 func TestParseConfigFileReturnsDefaultConfigEmptyPath(t *testing.T) {
 	config := NewConfig()
-	parsedConfig := ParseConfigFile("")
+	parsedConfig, _ := ParseConfigFile("")
 	if !cmp.Equal(parsedConfig, config) {
 		t.Error("The parsed config did not match the input config.")
 		t.Error(cmp.Diff(parsedConfig, config))

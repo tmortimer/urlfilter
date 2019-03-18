@@ -35,9 +35,9 @@ var errorsContainsURL = []string{
 func TestAddSecondaryFilterDoesNothing(t *testing.T) {
 	f := NewFake()
 	f.AddSecondaryFilter(NewFake())
-	if !cmp.Equal(*f, *NewFake()) {
-		t.Fatalf("Fake AddSecondaryFilter affected the filter... somehow.")
-		t.Fatal(cmp.Diff(*f, *NewFake()))
+	if !cmp.Equal(f, NewFake()) {
+		t.Errorf("Fake AddSecondaryFilter affected the filter... somehow.")
+		t.Error(cmp.Diff(f, NewFake()))
 	}
 }
 
