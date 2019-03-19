@@ -37,7 +37,26 @@ func TestNewRedisDefaults(t *testing.T) {
 	if redis.InsertChunkSize != 1000 {
 		t.Errorf("Redis.InsertChunkSize should be 1000 but was %d.", redis.InsertChunkSize)
 	}
+}
 
+func TestNewMySQLDefaults(t *testing.T) {
+	mysql := NewMySQL()
+
+	if mysql.Host != "" {
+		t.Errorf("MySQL.Hostname should be empty but was %s.", mysql.Host)
+	}
+
+	if mysql.Port != "3306" {
+		t.Errorf("MySQL.Port should be 6379 but was %s.", mysql.Port)
+	}
+
+	if mysql.Username != "" {
+		t.Errorf("MySQL.Password should be empty but was %s.", mysql.Password)
+	}
+
+	if mysql.Password != "" {
+		t.Errorf("MySQL.Password should be empty but was %s.", mysql.Password)
+	}
 }
 
 func TestNewConfig(t *testing.T) {
@@ -75,6 +94,11 @@ func TestParseConfig(t *testing.T) {
 	config.Redis.IdleTimeout = 4
 	config.Redis.Config = []string{"run some things"}
 	config.Redis.InsertChunkSize = 1
+
+	config.MySQL.Host = "google.ca"
+	config.MySQL.Port = "444"
+	config.MySQL.Username = "used"
+	config.MySQL.Password = "Changeme"
 
 	configBytes, err := json.Marshal(config)
 	if err != nil {
