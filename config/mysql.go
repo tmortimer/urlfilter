@@ -18,9 +18,9 @@ type MySQL struct {
 // Return MySQL config with default values.
 func NewMySQL() MySQL {
 	return MySQL{
-		Host:            "",
-		Port:            "3306",
-		Username:        "",
-		Password:        "",
+		Host:     "",
+		Port:     "3306",
+		Username: "",
+		Password: "",
 	}
 }

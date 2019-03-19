@@ -33,6 +33,12 @@ func CreateFilter(name string, config *config.Config) (Filter, error) {
 		return NewFake(), nil
 	case "redis":
 		return NewDB(connectors.NewRedis(config.Redis)), nil
+	case "mysql":
+		connector, err := connectors.NewMySQL(config.MySQL)
+		if err != nil {
+			return nil, err
+		}
+		return NewDB(connector), nil
 	}
 
 	return nil, fmt.Errorf("Unknown filter %s", name)
