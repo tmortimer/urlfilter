@@ -38,7 +38,7 @@ func (b *Bloom) ContainsURL(url string) (bool, error) {
 	//TOM error information is lost here on subsequent steps.
 	found, err := b.conn.ContainsURL(url)
 	if err != nil {
-		log.Printf("%s Bloom Filter generated an the error %s when checking for %s.", b.conn.Name(), err.Error(), url)
+		log.Printf("%s Bloom Filter generated an error, %s, when checking for %s.", b.conn.Name(), err.Error(), url)
 		return false, err
 	}
 
