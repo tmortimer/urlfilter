@@ -1,0 +1,14 @@
+{
+	"filters": [
+		"redis",
+		"mysql",
+		"fake"
+	],
+	"redis":{
+		"host":"localhost",
+		"port":"6379"
+	},
+	"mysql":{
+		"username":"root"
+	}
+}

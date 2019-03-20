@@ -2,8 +2,10 @@ package connectors
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/tmortimer/urlfilter/config"
+	"hash/crc32"
 )
 
 const CREATE_DB string = "CREATE DATABASE IF NOT EXISTS URLFilter"
@@ -11,6 +13,14 @@ const CREATE_DB string = "CREATE DATABASE IF NOT EXISTS URLFilter"
 const USE_DB string = "USE URLFilter"
 
 // High Performance MYSQL from O'REilly suggested the CRC as an index approach.
+// This is from Chapter 3: Schema Optimization and Indexing. The idea here is
+// that the CRC32 index is a lot faster to lookup than a string based index on the
+// url. It's possible to run into collisions, but that still likely only results
+// in a few rows to scan through.
+//
+// With a greater understanding of the sample size, and ideally with some sample
+// data one could evaluate if it's worth using CRC64, or even something else.
+
 const CREATE_URL_TABLE = "CREATE TABLE IF NOT EXISTS crcurls (" +
 	"id int unsigned NOT NULL auto_increment," +
 	"url varchar(2050) NOT NULL," +
@@ -18,6 +28,10 @@ const CREATE_URL_TABLE = "CREATE TABLE IF NOT EXISTS crcurls (" +
 	"PRIMARY KEY(id)," +
 	"INDEX(url_crc)" +
 	")"
+
+const SELECT_URL = "SELECT EXISTS(SELECT 1 FROM crcurls WHERE url_crc=? AND url=?)"
+
+const ADD_URL = "INSERT INTO crcurls (url_crc, url) VALUES (?, ?)"
 
 // Holds the MySQL connection pool and executes commands against MySQL.
 type MySQL struct {
@@ -36,7 +50,6 @@ func NewMySQL(config config.MySQL) (*MySQL, error) {
 
 	err := connector.ConfigureMySQL()
 	if err != nil {
-		r.db.Close() // Probably don't need this.
 		return nil, err
 	}
 	return connector, nil
@@ -78,14 +91,20 @@ func (r *MySQL) ConfigureMySQL() error {
 
 // Check if the URL is in MySQL.
 func (r *MySQL) ContainsURL(url string) (bool, error) {
+	exists := false
 
-	return false, nil
+	row := r.db.QueryRow(SELECT_URL, crc32.ChecksumIEEE([]byte(url)), url)
+	if err := row.Scan(&exists); err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }
 
 // Add the URL to the MySQL. Only used if this DB is being used as a cache.
 func (r *MySQL) AddURL(url string) error {
-
-	return nil
+	_, err := r.db.Exec(ADD_URL, crc32.ChecksumIEEE([]byte(url)), url)
+	return err
 }
 
 // Return the name MySQL for logging.
