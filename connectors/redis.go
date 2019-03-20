@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const BF_NAME string = "URLFilter"
+
+type ContainsFunc func(url string) (bool, error)
+type AddFunc func(url string) error
+
 // Holds the actual Redis connection pool and executes commands against Redis.
 type Redis struct {
 	// Redis connection pool.
@@ -13,10 +18,16 @@ type Redis struct {
 
 	// Redis specific config.
 	config config.Redis
+
+	// Function to check for existance of a URL.
+	contains ContainsFunc
+
+	// Function to add a URL.
+	add AddFunc
 }
 
 // Create a new Redis connector and setup the Redis connection pool.
-func NewRedis(config config.Redis) *Redis {
+func NewRedisBase(config config.Redis) *Redis {
 	connector := &Redis{
 		config: config,
 	}
@@ -29,6 +40,43 @@ func NewRedis(config config.Redis) *Redis {
 	connector.ConfigureRedis()
 
 	return connector
+}
+
+// Create a new Redis connector.
+func NewRedis(config config.Redis) *Redis {
+	connector := NewRedisBase(config)
+	connector.SetAccessors(false)
+	return connector
+}
+
+// Create a new Redis Bloom Filter connector.
+func NewRedisBloom(config config.Redis) *Redis {
+	connector := NewRedisBase(config)
+	connector.SetAccessors(true)
+	return connector
+}
+
+// Setup the functions used to check if URLs exist, and add them.
+// These change if this Redis connector is being used as for a
+// Bloom Filter.
+func (r *Redis) SetAccessors(bloom bool) {
+	if bloom {
+		r.contains = func(url string) (bool, error) {
+			return redis.Bool(r.Do("BF.EXISTS", BF_NAME, url))
+		}
+		r.add = func(url string) error {
+			_, err := r.Do("BF.ADD", BF_NAME, url)
+			return err
+		}
+	} else {
+		r.contains = func(url string) (bool, error) {
+			return redis.Bool(r.Do("EXISTS", url))
+		}
+		r.add = func(url string) error {
+			_, err := r.Do("SET", url, "\"\"")
+			return err
+		}
+	}
 }
 
 // Configure Redis based on the supplied config file.
