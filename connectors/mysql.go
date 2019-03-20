@@ -110,3 +110,7 @@ func (r *MySQL) AddURL(url string) error {
 func (r *MySQL) Name() string {
 	return "MySQL"
 }
+
+func (r *MySQL) GetURLPage(start int, number int) ([]string, error) {
+	return []string{}, nil
+}

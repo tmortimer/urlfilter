@@ -17,7 +17,7 @@ type Config struct {
 	Port string `json:"port"`
 
 	// Filter chain. Filters are called left to right - default ["redis"].
-	// Valid options are: redis, mysql, bloom and fake.
+	// Valid options are: redis, mysql, redismysqlbloom and fake.
 	Filters []string `json:"filters"`
 
 	// Config for Redis.

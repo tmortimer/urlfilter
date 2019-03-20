@@ -41,6 +41,28 @@ func TestCreateRedisFilterSuccess(t *testing.T) {
 	}
 }
 
+//TOM Need a live MySQL instance for successful creation of a MySQL Connector
+
+func TestCreateMySQLFilterFailure(t *testing.T) {
+	config := config.NewConfig()
+	_, err := CreateFilter("mysql", config)
+
+	if err == nil {
+		t.Fatalf("Creating a MySQL filter did not generate an error when one was expected.")
+	}
+}
+
+//TOM Need a live MySQL instance for successful creation of a MySQL Connector
+
+func TestCreateRedisMySQLBloomFilterFailure(t *testing.T) {
+	config := config.NewConfig()
+	_, err := CreateFilter("redismysqlbloom", config)
+
+	if err == nil {
+		t.Fatalf("Creating a Redis-MySQL bloom filter did not generate an error when one was expected.")
+	}
+}
+
 func TestCreateFilterFailure(t *testing.T) {
 	config := config.NewConfig()
 	_, err := CreateFilter("wzzl", config)

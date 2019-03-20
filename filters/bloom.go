@@ -16,12 +16,16 @@ type Bloom struct {
 
 	// The underlying DB connection pool.
 	conn connectors.Connector
+
+	// The DB connector used to load the bloom filter
+	loader connectors.Loader
 }
 
 // Return a new database filter.
-func NewBloom(conn connectors.Connector) *Bloom {
+func NewBloom(conn connectors.Connector, loader connectors.Loader) *Bloom {
 	return &Bloom{
-		conn: conn,
+		conn:   conn,
+		loader: loader,
 	}
 }
 

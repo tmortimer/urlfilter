@@ -39,6 +39,12 @@ func CreateFilter(name string, config *config.Config) (Filter, error) {
 			return nil, err
 		}
 		return NewDB(connector), nil
+	case "redismysqlbloom":
+		loader, err := connectors.NewMySQL(config.MySQL)
+		if err != nil {
+			return nil, err
+		}
+		return NewBloom(connectors.NewRedis(config.Redis), loader), nil
 	}
 
 	return nil, fmt.Errorf("Unknown filter %s", name)
