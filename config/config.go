@@ -22,10 +22,13 @@ type Config struct {
 
 	// Config for Redis.
 	Redis Redis `json:"redis"`
+
+	// Config for MySQL.
+	MySQL MySQL `json:"mysql"`
 }
 
 // Valid Filters to use as Cache
-var validFilters = map[string]bool{"redis": true, "fake": true}
+var validFilters = map[string]bool{"mysql": true, "redis": true, "fake": true}
 
 // Return Config with default values.
 func NewConfig() *Config {
@@ -34,6 +37,7 @@ func NewConfig() *Config {
 		Port:    "8080",
 		Filters: []string{"redis"},
 		Redis:   NewRedis(),
+		MySQL:   NewMySQL(),
 	}
 }
 

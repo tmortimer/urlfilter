@@ -1,0 +1,13 @@
+{
+	"filters": [
+		"redis",
+		"mysql"
+	],
+	"redis":{
+		"host":"urlfilter-redis-only-redis",
+		"port":"6379"
+	},
+	"mysql":{
+		"username":"root"
+	}
+}
