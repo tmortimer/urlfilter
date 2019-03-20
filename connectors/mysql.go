@@ -2,7 +2,6 @@ package connectors
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/tmortimer/urlfilter/config"
 	"hash/crc32"
