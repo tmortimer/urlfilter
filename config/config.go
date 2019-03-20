@@ -27,7 +27,7 @@ type Config struct {
 	MySQL MySQL `json:"mysql"`
 
 	// Config for Redis Bloom Filter.
-	Bloom Bloom `json:"bloom"`
+	RedisMySQLBloom RedisMySQLBloom `json:"redismysqlbloom"`
 }
 
 // Valid Filters to use as Cache
@@ -36,12 +36,12 @@ var validFilters = map[string]bool{"mysql": true, "redis": true, "fake": true}
 // Return Config with default values.
 func NewConfig() *Config {
 	return &Config{
-		Host:    "",
-		Port:    "8080",
-		Filters: []string{"redis"},
-		Redis:   NewRedis(),
-		MySQL:   NewMySQL(),
-		Bloom:   NewBloom(),
+		Host:            "",
+		Port:            "8080",
+		Filters:         []string{"redis"},
+		Redis:           NewRedis(),
+		MySQL:           NewMySQL(),
+		RedisMySQLBloom: NewRedisMySQLBloom(),
 	}
 }
 

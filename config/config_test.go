@@ -60,16 +60,26 @@ func TestNewMySQLDefaults(t *testing.T) {
 }
 
 func TestNewBloomDefaults(t *testing.T) {
-	bloom := NewBloom()
+	bloom := NewRedisMySQLBloom()
 
-	if bloom.LoadPageSize != 1000 {
-		t.Errorf("Bloom.LoadPageSize should be 1000 but was %d.", bloom.LoadPageSize)
+	if bloom.PageLoadSize != 1000 {
+		t.Errorf("Bloom.PageLoadSize should be 1000 but was %d.", bloom.PageLoadSize)
+	}
+
+	if bloom.PageLoadInterval != 5 {
+		t.Errorf("Bloom.PageLoadInterval should be 5 but was %d.", bloom.PageLoadInterval)
 	}
 
 	redis := NewRedis()
 	if !cmp.Equal(bloom.Redis, redis) {
 		t.Error("The default bloom config options had non-default Redis config.")
 		t.Error(cmp.Diff(bloom.Redis, redis))
+	}
+
+	mysql := NewMySQL()
+	if !cmp.Equal(bloom.MySQL, mysql) {
+		t.Error("The default bloom config options had non-default MySQL config.")
+		t.Error(cmp.Diff(bloom.MySQL, mysql))
 	}
 }
 
@@ -100,10 +110,10 @@ func TestNewConfig(t *testing.T) {
 		t.Error(cmp.Diff(config.MySQL, mysql))
 	}
 
-	bloom := NewBloom()
-	if !cmp.Equal(config.Bloom, bloom) {
+	bloom := NewRedisMySQLBloom()
+	if !cmp.Equal(config.RedisMySQLBloom, bloom) {
 		t.Error("The default config options had non-default Bloom config.")
-		t.Error(cmp.Diff(config.Bloom, bloom))
+		t.Error(cmp.Diff(config.RedisMySQLBloom, bloom))
 	}
 }
 
@@ -126,14 +136,19 @@ func TestParseConfig(t *testing.T) {
 	config.MySQL.Username = "used"
 	config.MySQL.Password = "Changeme"
 
-	config.Bloom.LoadPageSize = 66
-	config.Bloom.Redis.Host = "google.ca"
-	config.Bloom.Redis.Port = "444"
-	config.Bloom.Redis.Password = "Changeme"
-	config.Bloom.Redis.MaxIdle = 100
-	config.Bloom.Redis.IdleTimeout = 4
-	config.Bloom.Redis.Config = []string{"run some things"}
-	config.Bloom.Redis.InsertChunkSize = 1
+	config.RedisMySQLBloom.PageLoadSize = 66
+	config.RedisMySQLBloom.PageLoadInterval = 6
+	config.RedisMySQLBloom.Redis.Host = "google.ca"
+	config.RedisMySQLBloom.Redis.Port = "444"
+	config.RedisMySQLBloom.Redis.Password = "Changeme"
+	config.RedisMySQLBloom.Redis.MaxIdle = 100
+	config.RedisMySQLBloom.Redis.IdleTimeout = 4
+	config.RedisMySQLBloom.Redis.Config = []string{"run some things"}
+	config.RedisMySQLBloom.Redis.InsertChunkSize = 1
+	config.RedisMySQLBloom.MySQL.Host = "google.ca"
+	config.RedisMySQLBloom.MySQL.Port = "444"
+	config.RedisMySQLBloom.MySQL.Username = "used"
+	config.RedisMySQLBloom.MySQL.Password = "Changeme"
 
 	configBytes, err := json.Marshal(config)
 	if err != nil {
