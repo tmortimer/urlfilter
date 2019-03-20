@@ -17,7 +17,7 @@ type Config struct {
 	Port string `json:"port"`
 
 	// Filter chain. Filters are called left to right - default ["redis"].
-	// Valid options are: redis and fake.
+	// Valid options are: redis, mysql, bloom and fake.
 	Filters []string `json:"filters"`
 
 	// Config for Redis.
@@ -25,6 +25,9 @@ type Config struct {
 
 	// Config for MySQL.
 	MySQL MySQL `json:"mysql"`
+
+	// Config for Redis Bloom Filter.
+	Bloom Bloom `json:"bloom"`
 }
 
 // Valid Filters to use as Cache
@@ -38,6 +41,7 @@ func NewConfig() *Config {
 		Filters: []string{"redis"},
 		Redis:   NewRedis(),
 		MySQL:   NewMySQL(),
+		Bloom:   NewBloom(),
 	}
 }
 

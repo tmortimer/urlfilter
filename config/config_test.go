@@ -59,6 +59,20 @@ func TestNewMySQLDefaults(t *testing.T) {
 	}
 }
 
+func TestNewBloomDefaults(t *testing.T) {
+	bloom := NewBloom()
+
+	if bloom.LoadPageSize != 1000 {
+		t.Errorf("Bloom.LoadPageSize should be 1000 but was %d.", bloom.LoadPageSize)
+	}
+
+	redis := NewRedis()
+	if !cmp.Equal(bloom.Redis, redis) {
+		t.Error("The default bloom config options had non-default Redis config.")
+		t.Error(cmp.Diff(bloom.Redis, redis))
+	}
+}
+
 func TestNewConfig(t *testing.T) {
 	config := NewConfig()
 
@@ -78,6 +92,18 @@ func TestNewConfig(t *testing.T) {
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
 		t.Error(cmp.Diff(config.Redis, redis))
+	}
+
+	mysql := NewMySQL()
+	if !cmp.Equal(config.MySQL, mysql) {
+		t.Error("The default config options had non-default MySQL config.")
+		t.Error(cmp.Diff(config.MySQL, mysql))
+	}
+
+	bloom := NewBloom()
+	if !cmp.Equal(config.Bloom, bloom) {
+		t.Error("The default config options had non-default Bloom config.")
+		t.Error(cmp.Diff(config.Bloom, bloom))
 	}
 }
 
@@ -99,6 +125,15 @@ func TestParseConfig(t *testing.T) {
 	config.MySQL.Port = "444"
 	config.MySQL.Username = "used"
 	config.MySQL.Password = "Changeme"
+
+	config.Bloom.LoadPageSize = 66
+	config.Bloom.Redis.Host = "google.ca"
+	config.Bloom.Redis.Port = "444"
+	config.Bloom.Redis.Password = "Changeme"
+	config.Bloom.Redis.MaxIdle = 100
+	config.Bloom.Redis.IdleTimeout = 4
+	config.Bloom.Redis.Config = []string{"run some things"}
+	config.Bloom.Redis.InsertChunkSize = 1
 
 	configBytes, err := json.Marshal(config)
 	if err != nil {
