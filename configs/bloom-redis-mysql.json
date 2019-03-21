@@ -1,0 +1,25 @@
+{
+	"filters": [
+		"redismysqlbloom",
+		"redis",
+		"mysql"
+	],
+	"redis":{
+		"host":"urlfilter-bloom-redis-mysql-redis"
+	},
+	"mysql":{
+		"host":"urlfilter-bloom-redis-mysql-db",
+		"username": "user",
+		"password": "password"
+	},
+	"redismysqlbloom": {	
+		"redis":{
+			"host":"urlfilter-bloom-redis-mysql-redis"
+		},
+		"mysql":{
+			"host":"urlfilter-bloom-redis-mysql-db",
+			"username": "user",
+			"password": "password"
+		}
+	}
+}
