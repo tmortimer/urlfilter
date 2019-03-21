@@ -44,7 +44,9 @@ func CreateFilter(name string, config *config.Config) (Filter, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewBloom(connectors.NewRedis(config.RedisMySQLBloom.Redis), loader), nil
+		return NewBloom(
+			connectors.NewRedis(config.RedisMySQLBloom.Redis), loader, 
+				config.RedisMySQLBloom.PageLoadSize, config.RedisMySQLBloom.PageLoadInterval), nil
 	}
 
 	return nil, fmt.Errorf("Unknown filter %s", name)

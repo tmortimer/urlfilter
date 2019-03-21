@@ -32,6 +32,8 @@ const SELECT_URL = "SELECT EXISTS(SELECT 1 FROM crcurls WHERE url_crc=? AND url=
 
 const ADD_URL = "INSERT INTO crcurls (url_crc, url) VALUES (?, ?)"
 
+const SELECT_RANGE = "SELECT url FROM crcurls WHERE id BETWEEN ? AND ?"
+
 // Holds the MySQL connection pool and executes commands against MySQL.
 type MySQL struct {
 	// MySQL connection pool.
@@ -112,5 +114,26 @@ func (r *MySQL) Name() string {
 }
 
 func (r *MySQL) GetURLPage(start int, number int) ([]string, error) {
-	return []string{}, nil
+	urls := make([]string, 0, number)
+	rows, err := r.db.Query(SELECT_RANGE, start, start + number - 1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	i := 0
+	for rows.Next() {
+		err := rows.Scan(&urls[i])
+		if err != nil {
+			return nil, err
+		}
+		i++
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return urls, nil
 }

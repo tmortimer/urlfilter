@@ -19,14 +19,32 @@ type Bloom struct {
 
 	// The DB connector used to load the bloom filter
 	loader connectors.Loader
+
+	// The number of URLs we load at one time while populating the filter.
+	pageLoadSize int
+
+	// The frequency at which we look for new URLs to add to the filter..
+	pageLoadInterval int
 }
 
 // Return a new database filter.
-func NewBloom(conn connectors.Connector, loader connectors.Loader) *Bloom {
-	return &Bloom{
+func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize int, pageLoadInterval int) *Bloom {
+	bloom := &Bloom{
 		conn:   conn,
 		loader: loader,
+		pageLoadSize: pageLoadSize,
+		pageLoadInterval: pageLoadInterval,
 	}
+	bloom.Load()
+
+	return bloom
+}
+
+// Load the bloom filter from the backing data store provided by the loader.
+func (b *Bloom) Load() {
+	//while true {
+
+	//}
 }
 
 // Add a secondary filter. Necessary if using this DB as a cache.

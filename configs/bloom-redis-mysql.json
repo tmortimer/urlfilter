@@ -5,19 +5,19 @@
 		"mysql"
 	],
 	"redis":{
-		"host":"urlfilter-bloom-redis-mysql-redis"
+		"host":"bloom-redis-mysql-redisdb"
 	},
 	"mysql":{
-		"host":"urlfilter-bloom-redis-mysql-db",
+		"host":"bloom-redis-mysql-mysqldb",
 		"username": "user",
 		"password": "password"
 	},
 	"redismysqlbloom": {	
 		"redis":{
-			"host":"urlfilter-bloom-redis-mysql-redis"
+			"host":"bloom-redis-mysql-redisdb"
 		},
 		"mysql":{
-			"host":"urlfilter-bloom-redis-mysql-db",
+			"host":"bloom-redis-mysql-mysqldb",
 			"username": "user",
 			"password": "password"
 		}
