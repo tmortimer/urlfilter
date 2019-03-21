@@ -86,10 +86,11 @@ func (b *Bloom) AddSecondaryFilter(filter Filter) {
 	b.next = filter
 }
 
-// If the URL is found in the Bloom Filter we have to then check the next
-// next filter in the chain because Bloom Filters can return false
-// positives. If it's not found then we can return right away as
-// a negative result is final.
+// Check the Bloom Filter for the URL. If the URL is found in the
+// Bloom Filter we have to then check the next next filter in the
+// chain because Bloom Filters can return false positives. If
+// it's not found then we can return right away as a negative
+// result is final.
 func (b *Bloom) ContainsURL(url string) (bool, error) {
 	//TOM error information is lost here on subsequent steps.
 	found, err := b.conn.ContainsURL(url)

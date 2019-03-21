@@ -5,7 +5,12 @@
 		"mysql"
 	],
 	"redis":{
-		"host":"bloom-redis-mysql-redisdb"
+		"host":"bloom-redis-mysql-redisdb",
+		"port":"6380",
+		"config": [
+			"CONFIG SET maxmemory 1GB",
+			"CONFIG SET maxmemory-policy allkeys-lfu"
+		]
 	},
 	"mysql":{
 		"host":"bloom-redis-mysql-mysqldb",
@@ -14,9 +19,9 @@
 	},
 	"redismysqlbloom": {	
 		"redis":{
-			"host":"bloom-redis-mysql-redisdb",
+			"host":"bloom-redis-mysql-redisbloom",
 			"config": [
-				"BF.RESERVE URLFilter 0.0001, 1000000"
+				"BF.RESERVE URLFilter 0.0001 1000000"
 			]
 		},
 		"mysql":{

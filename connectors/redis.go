@@ -1,8 +1,10 @@
 package connectors
 
 import (
+	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/tmortimer/urlfilter/config"
+	"strings"
 	"time"
 )
 
@@ -82,7 +84,17 @@ func (r *Redis) SetAccessors(bloom bool) {
 // Configure Redis based on the supplied config file.
 func (r *Redis) ConfigureRedis() {
 	for _, command := range r.config.Config {
-		r.Do(command)
+		parts := strings.Split(command, " ")
+		cmd := parts[0]
+		sargs := parts[1:len(parts)]
+		args := make([]interface{}, len(sargs))
+		for i, arg := range sargs {
+			args[i] = arg
+		}
+		_, err := r.Do(cmd, args...)
+		if err != nil {
+			fmt.Printf("Failed to set the following Redis config: %s - %s.\n", command, err)
+		}
 	}
 }
 
