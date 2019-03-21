@@ -78,7 +78,7 @@ func (b *Bloom) Load() {
 	}
 
 	b.numURLs += count
-	log.Printf("The Bloom Filder loaded %d urls for a total of %d.", count, b.numURLs)
+	log.Printf("The Bloom Filter loaded %d urls for a total of %d.", count, b.numURLs)
 }
 
 // Add a secondary filter. Necessary if using this DB as a cache.

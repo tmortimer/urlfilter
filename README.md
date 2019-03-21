@@ -60,6 +60,8 @@ mysql> explain select url from crcurls where url_crc=1076669273 AND url="9oxigfy
 +----+-------------+---------+------------+------+---------------+---------+---------+-------+------+----------+-------------+
 ```
 
+After adding two rounds of URLs, based off the same domain names, there were 126 collisions, and nothing more than 2 deep. With more URLs in the picture you could switch to CRC64.
+
 # Unit Tests
 Run **go test ./..** to run unit tests.
 
