@@ -31,7 +31,7 @@ type Config struct {
 }
 
 // Valid Filters to use as Cache
-var validFilters = map[string]bool{"redismysqlbloom":true, "mysql": true, "redis": true, "fake": true}
+var validFilters = map[string]bool{"redismysqlbloom": true, "mysql": true, "redis": true, "fake": true}
 
 // Return Config with default values.
 func NewConfig() *Config {

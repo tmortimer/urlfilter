@@ -8,13 +8,26 @@ github.com/gomodule/redigo/redis
 github.com/tjarratt/babble
 ```
 
+# Filter Chaining
+Blurb about filter chain...
+```
+bloom-redis-mysql_1          | 2019/03/21 04:56:10 The Bloom Filder loaded an additional 26839 urls for a total of 26839.
+bloom-redis-mysql_1          | 2019/03/21 04:56:14 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis Bloom Filter, checking the next filter.
+bloom-redis-mysql_1          | 2019/03/21 04:56:15 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in MySQL.
+bloom-redis-mysql_1          | 2019/03/21 04:56:15 Adding URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism to Redis cache.
+bloom-redis-mysql_1          | 2019/03/21 04:56:32 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis Bloom Filter, checking the next filter.
+bloom-redis-mysql_1          | 2019/03/21 04:56:32 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis cache.
+```
+
 # Docker Compose
 ## Requirements
 [Docker](https://www.docker.com/get-started)\
 [Docker Compose](https://docs.docker.com/compose/)
 
 ## Run With Docker Compose
-Passing -d to the up command causes the containers to run in the background. If you want to see logs don't do this. Run these from the urlfitler directory. Stop will stop the containers, down will remove the.
+Passing -d to the up command causes the containers to run in the background. If you want to see logs don't do this. Run these from the urlfitler directory. For some reason the compose dependencies aren't quite working right, so the first up may take to long to initialize MySQL and the main app container will fail. Stopping them and bringing them up again will solve that.
+
+Stop will stop the containers, down will remove them.
 
 The data will persist until you run the docker volume command.
 ```
@@ -45,7 +58,7 @@ mysql> explain select url from crcurls where url_crc=1076669273 AND url="9oxigfy
 +----+-------------+---------+------------+------+---------------+---------+---------+-------+------+----------+-------------+
 ```
 
-# Testing
+# Unit Tests
 Run **go test ./..** to run unit tests.
 
 # Docs

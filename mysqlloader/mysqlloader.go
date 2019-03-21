@@ -42,43 +42,43 @@ func main() {
 	babbler := babble.NewBabbler()
 	scanner := bufio.NewScanner(list)
 	count := 0
-    for scanner.Scan() {
-    	url := scanner.Text()
+	for scanner.Scan() {
+		url := scanner.Text()
 
-    	if *pathDepth != 0 {
-    		depth := rand.Intn(*pathDepth)
-    		if depth != 0 {
-	    		babbler.Count = depth
-	    		babbler.Separator = "/"
-	    		url += "/"
-	    		url += babbler.Babble()
-	    	}
-    	}
+		if *pathDepth != 0 {
+			depth := rand.Intn(*pathDepth)
+			if depth != 0 {
+				babbler.Count = depth
+				babbler.Separator = "/"
+				url += "/"
+				url += babbler.Babble()
+			}
+		}
 
-    	if *queryDepth != 0 {
-    		babbler.Count = 2
-    		depth := rand.Intn(*queryDepth)
-    		if depth != 0 {
-    			url += "?"
-    			for i := 0; i < depth; i++ {
-		    		babbler.Separator = "="
-		    		url += babbler.Babble()
+		if *queryDepth != 0 {
+			babbler.Count = 2
+			depth := rand.Intn(*queryDepth)
+			if depth != 0 {
+				url += "?"
+				for i := 0; i < depth; i++ {
+					babbler.Separator = "="
+					url += babbler.Babble()
 
-		    		if depth > i + 1 {
-		    			url += "&"
-		    		}
-		    	}
-	    	}
-    	}
+					if depth > i+1 {
+						url += "&"
+					}
+				}
+			}
+		}
 
-        conn.AddURL(url)
-        fmt.Println(url)
-        count++
-    }
+		conn.AddURL(url)
+		fmt.Println(url)
+		count++
+	}
 
-    fmt.Printf("Added %d URLs to the DB.\n", count)
+	fmt.Printf("Added %d URLs to the DB.\n", count)
 
-    if err = scanner.Err(); err != nil {
-        log.Fatalf("URL list scanner failed: %s", err)
-    }
+	if err = scanner.Err(); err != nil {
+		log.Fatalf("URL list scanner failed: %s", err)
+	}
 }

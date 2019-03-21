@@ -17,23 +17,31 @@ type Bloom struct {
 	// The underlying DB connection pool.
 	conn connectors.Connector
 
-	// The DB connector used to load the bloom filter
+	// The DB connector used to load the Bloom Filter.
 	loader connectors.Loader
 
-	// The number of URLs we load at one time while populating the filter.
+	// The number of URLs we load at one time while populating the Bloom Filter.
 	pageLoadSize int
 
-	// The frequency at which we look for new URLs to add to the filter..
+	// The frequency at which we look for new URLs to add to the Bloom Filter.
 	pageLoadInterval int
+
+	// The ID of the last URL loaded from the DB.
+	lastIdLoaded int
+
+	// The number of URLs loaded into the Bloom Filter.
+	numURLs int
 }
 
 // Return a new database filter.
 func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize int, pageLoadInterval int) *Bloom {
 	bloom := &Bloom{
-		conn:   conn,
-		loader: loader,
-		pageLoadSize: pageLoadSize,
+		conn:             conn,
+		loader:           loader,
+		pageLoadSize:     pageLoadSize,
 		pageLoadInterval: pageLoadInterval,
+		lastIdLoaded:     0,
+		numURLs:          0,
 	}
 	bloom.Load()
 
@@ -42,9 +50,28 @@ func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize 
 
 // Load the bloom filter from the backing data store provided by the loader.
 func (b *Bloom) Load() {
-	//while true {
+	maxID, err := b.loader.GetMaxID()
+	if err != nil {
+		log.Printf("Failed to load Bloom Filter %s.", err)
+		return
+	}
 
-	//}
+	count := 0
+	for b.lastIdLoaded < maxID {
+		urls, lastIdLoaded, err := b.loader.GetURLPage(b.lastIdLoaded+1, b.pageLoadSize)
+		if err != nil {
+			log.Printf("Failed to load Bloom Filter %s.", err)
+			return
+		}
+		for _, url := range urls {
+			b.conn.AddURL(url)
+		}
+		count += len(urls)
+		b.lastIdLoaded = lastIdLoaded
+	}
+
+	b.numURLs += count
+	log.Printf("The Bloom Filder loaded an additional %d urls for a total of %d.", count, b.numURLs)
 }
 
 // Add a secondary filter. Necessary if using this DB as a cache.

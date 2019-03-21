@@ -96,7 +96,7 @@ func (r *Redis) Do(cmd string, keysAndArgs ...interface{}) (interface{}, error) 
 
 // Check if the URL is in Redis.
 func (r *Redis) ContainsURL(url string) (bool, error) {
-	found, err := redis.Bool(r.Do("EXISTS", url))
+	found, err := r.contains(url)
 	if err != nil {
 		// Not sure what the state of found will be after a failed
 		// call to the Redis library, so be sure it's false.
@@ -109,9 +109,7 @@ func (r *Redis) ContainsURL(url string) (bool, error) {
 // Add the URL to the Redis. Only used if this DB is being used as a cache.
 func (r *Redis) AddURL(url string) error {
 	// Use "" as the value since we only care about the key.
-	_, err := r.Do("SET", url, "\"\"")
-
-	return err
+	return r.add(url)
 }
 
 // Return the name Redis for logging.
