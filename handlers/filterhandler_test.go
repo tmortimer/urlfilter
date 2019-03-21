@@ -12,8 +12,9 @@ type TestFilter struct {
 	called int
 }
 
-func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) {
+func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) error {
 	f.next = filter
+	return nil
 }
 
 func (f *TestFilter) ContainsURL(url string) (bool, error) {

@@ -11,7 +11,7 @@ github.com/tjarratt/babble
 # Filter Chaining
 Blurb about filter chain...
 ```
-bloom-redis-mysql_1          | 2019/03/21 04:56:10 The Bloom Filder loaded an additional 26839 urls for a total of 26839.
+bloom-redis-mysql_1          | 2019/03/21 04:56:10 The Bloom Filter loaded an additional 26839 urls for a total of 26839.
 bloom-redis-mysql_1          | 2019/03/21 04:56:14 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis Bloom Filter, checking the next filter.
 bloom-redis-mysql_1          | 2019/03/21 04:56:15 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in MySQL.
 bloom-redis-mysql_1          | 2019/03/21 04:56:15 Adding URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism to Redis cache.

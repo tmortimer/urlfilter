@@ -1,7 +1,7 @@
 package filters
 
 import (
-	"fmt"
+	"errors"
 	"github.com/tmortimer/urlfilter/connectors"
 	"log"
 	"sync/atomic"
@@ -36,6 +36,9 @@ type Bloom struct {
 
 	// Store whether the bloom filter is ready or not
 	ready int32
+
+	// Timer for refreshing the Bloom Filter and picking up new entries.
+
 }
 
 // Return a new database filter.
@@ -88,9 +91,13 @@ func (b *Bloom) Load() {
 	log.Printf("The Bloom Filter loaded %d urls for a total of %d.", count, b.numURLs)
 }
 
-// Add a secondary filter. Necessary if using this DB as a cache.
-func (b *Bloom) AddSecondaryFilter(filter Filter) {
+// Add a secondary filter. Required for Bloom Filters.
+func (b *Bloom) AddSecondaryFilter(filter Filter) error {
+	if filter == nil {
+		return errors.New("Bloom Filter can't be configured without a secondary Filter.")
+	}
 	b.next = filter
+	return nil
 }
 
 // Check the Bloom Filter for the URL. If the URL is found in the
@@ -101,30 +108,18 @@ func (b *Bloom) AddSecondaryFilter(filter Filter) {
 // If the Bloom Filter has not yet been loaded, skip it.
 func (b *Bloom) ContainsURL(url string) (bool, error) {
 	if atomic.LoadInt32(&(b.ready)) == 0 {
-		if b.next != nil {
-			log.Printf("%s Bloom Filter is not yet loaded, checking the next filter.", b.conn.Name())
-			return b.next.ContainsURL(url)
-		} else {
-			log.Printf("%s Bloom Filter is not yet loaded, but no secondary filter is configured.", b.conn.Name())
-			return false, fmt.Errorf("No secondary filter configured for %s Bloom Filter.", b.conn.Name())
-		}
+		log.Printf("%s Bloom Filter is not yet loaded, checking the next filter.", b.conn.Name())
+		return b.next.ContainsURL(url)
 	}
 
-	//TOM error information is lost here on subsequent steps.
 	found, err := b.conn.ContainsURL(url)
-	if err != nil {
-		log.Printf("%s Bloom Filter generated an error, %s, when checking for %s.", b.conn.Name(), err.Error(), url)
-		return false, err
-	}
-
-	if found {
-		if b.next != nil {
+	if found || err != nil{
+		if err == nil {
 			log.Printf("URL %s found in %s Bloom Filter, checking the next filter.", url, b.conn.Name())
-			return b.next.ContainsURL(url)
 		} else {
-			log.Printf("URL %s found in %s Bloom Filter, but no seconary filter configured.", url, b.conn.Name())
-			return false, fmt.Errorf("No secondary filter configured for %s Bloom Filter.", b.conn.Name())
+			log.Printf("%s Bloom Filter generated an error, %s, when checking for %s.", b.conn.Name(), err.Error(), url)
 		}
+		return b.next.ContainsURL(url)
 	}
 
 	// Not found. Nothing to see here.

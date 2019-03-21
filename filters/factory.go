@@ -19,7 +19,11 @@ func FilterFactory(config *config.Config) (Filter, error) {
 			return nil, err
 		}
 
-		current.AddSecondaryFilter(filter)
+		err = current.AddSecondaryFilter(filter)
+		if err != nil {
+			return nil, err
+		}
+
 		filter = current
 	}
 

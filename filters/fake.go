@@ -15,7 +15,9 @@ func NewFake() *Fake {
 
 // Since this filter is full of lies it does nothing
 // with any secondary filter chaning anyways.
-func (f *Fake) AddSecondaryFilter(filter Filter) {}
+func (f *Fake) AddSecondaryFilter(filter Filter) error {
+	return nil
+}
 
 // Returns true if the url contains facebook anywhere in it,
 // because that's as good as anything to block.
