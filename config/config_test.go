@@ -66,8 +66,8 @@ func TestNewBloomDefaults(t *testing.T) {
 		t.Errorf("Bloom.PageLoadSize should be 1000 but was %d.", bloom.PageLoadSize)
 	}
 
-	if bloom.PageLoadInterval != 5 {
-		t.Errorf("Bloom.PageLoadInterval should be 5 but was %d.", bloom.PageLoadInterval)
+	if bloom.PageLoadInterval != 1 {
+		t.Errorf("Bloom.PageLoadInterval should be 1 but was %d.", bloom.PageLoadInterval)
 	}
 
 	redis := NewRedis()

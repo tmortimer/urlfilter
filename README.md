@@ -35,6 +35,8 @@ docker-compose up [-d]
 ...
 curl 'http://localhost:8080/urlinfo/1/www.facebook.com:9090/peww/what/who/merp.html?face=ac&w' -v
 ...
+docker-compose logs bloom-redis-mysql
+
 docker-compose stop
 
 docker-compose down

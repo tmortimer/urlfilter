@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tmortimer/urlfilter/connectors"
 	"log"
+	"time"
 )
 
 // Bloom Filter Filter (ahahaha). Bloom filters are used to check
@@ -24,7 +25,7 @@ type Bloom struct {
 	pageLoadSize int
 
 	// The frequency at which we look for new URLs to add to the Bloom Filter.
-	pageLoadInterval int
+	pageLoadInterval time.Duration
 
 	// The ID of the last URL loaded from the DB.
 	lastIdLoaded int
@@ -39,11 +40,17 @@ func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize 
 		conn:             conn,
 		loader:           loader,
 		pageLoadSize:     pageLoadSize,
-		pageLoadInterval: pageLoadInterval,
+		pageLoadInterval: time.Duration(pageLoadInterval),
 		lastIdLoaded:     0,
 		numURLs:          0,
 	}
-	bloom.Load()
+
+	go func() {
+		bloom.Load()
+		for _ = range time.Tick(bloom.pageLoadInterval * time.Minute) {
+			bloom.Load()
+		}
+	}()
 
 	return bloom
 }
@@ -71,7 +78,7 @@ func (b *Bloom) Load() {
 	}
 
 	b.numURLs += count
-	log.Printf("The Bloom Filder loaded an additional %d urls for a total of %d.", count, b.numURLs)
+	log.Printf("The Bloom Filder loaded %d urls for a total of %d.", count, b.numURLs)
 }
 
 // Add a secondary filter. Necessary if using this DB as a cache.

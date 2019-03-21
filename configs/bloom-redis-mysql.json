@@ -14,7 +14,10 @@
 	},
 	"redismysqlbloom": {	
 		"redis":{
-			"host":"bloom-redis-mysql-redisdb"
+			"host":"bloom-redis-mysql-redisdb",
+			"config": [
+				"BF.RESERVE URLFilter 0.0001, 1000000"
+			]
 		},
 		"mysql":{
 			"host":"bloom-redis-mysql-mysqldb",

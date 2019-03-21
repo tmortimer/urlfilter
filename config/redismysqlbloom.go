@@ -22,6 +22,6 @@ func NewRedisMySQLBloom() RedisMySQLBloom {
 		Redis:            NewRedis(),
 		MySQL:            NewMySQL(),
 		PageLoadSize:     1000,
-		PageLoadInterval: 5,
+		PageLoadInterval: 1,
 	}
 }
