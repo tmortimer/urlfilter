@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tmortimer/urlfilter/connectors"
 	"log"
+	"sync/atomic"
 	"time"
 )
 
@@ -32,6 +33,9 @@ type Bloom struct {
 
 	// The number of URLs loaded into the Bloom Filter.
 	numURLs int
+
+	// Store whether the bloom filter is ready or not
+	ready int32
 }
 
 // Return a new database filter.
@@ -43,10 +47,13 @@ func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize 
 		pageLoadInterval: time.Duration(pageLoadInterval),
 		lastIdLoaded:     0,
 		numURLs:          0,
+		ready:            0,
 	}
 
 	go func() {
 		bloom.Load()
+		atomic.StoreInt32(&(bloom.ready), 1)
+
 		for _ = range time.Tick(bloom.pageLoadInterval * time.Minute) {
 			bloom.Load()
 		}
@@ -91,7 +98,18 @@ func (b *Bloom) AddSecondaryFilter(filter Filter) {
 // chain because Bloom Filters can return false positives. If
 // it's not found then we can return right away as a negative
 // result is final.
+// If the Bloom Filter has not yet been loaded, skip it.
 func (b *Bloom) ContainsURL(url string) (bool, error) {
+	if atomic.LoadInt32(&(b.ready)) == 0 {
+		if b.next != nil {
+			log.Printf("%s Bloom Filter is not yet loaded, checking the next filter.", b.conn.Name())
+			return b.next.ContainsURL(url)
+		} else {
+			log.Printf("%s Bloom Filter is not yet loaded, but no secondary filter is configured.", b.conn.Name())
+			return false, fmt.Errorf("No secondary filter configured for %s Bloom Filter.", b.conn.Name())
+		}
+	}
+
 	//TOM error information is lost here on subsequent steps.
 	found, err := b.conn.ContainsURL(url)
 	if err != nil {

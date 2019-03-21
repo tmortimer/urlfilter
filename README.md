@@ -19,6 +19,16 @@ bloom-redis-mysql_1          | 2019/03/21 04:56:32 URL wsxzsal8.club/crackle/reb
 bloom-redis-mysql_1          | 2019/03/21 04:56:32 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis cache.
 ```
 
+# Waiting Until The Filter Is Ready On A New Worker
+```
+bloom-redis-mysql_1             | 2019/03/21 18:08:58 Redis Bloom Filter is not yet loaded, checking the next filter.
+bloom-redis-mysql_1             | 2019/03/21 18:08:58 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in MySQL.
+bloom-redis-mysql_1             | 2019/03/21 18:08:58 Adding URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism to Redis cache.
+bloom-redis-mysql_1             | 2019/03/21 18:09:07 The Bloom Filter loaded 53678 urls for a total of 53678.
+bloom-redis-mysql_1             | 2019/03/21 18:09:11 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis Bloom Filter, checking the next filter.
+bloom-redis-mysql_1             | 2019/03/21 18:09:11 URL wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism found in Redis cache.
+```
+
 # Docker Compose
 ## Requirements
 [Docker](https://www.docker.com/get-started)\
@@ -50,7 +60,7 @@ Run the following with the docker-compose containers up and running. This will t
 go run mysqlloader/mysqlloader.go --config=configs/mysql-loader.json --list mysqlloader/domains-only.txt -mpdepth 5 -mqdepth 3
 ```
 
-# Performance of Querying MySQL With the CRC Index
+# Performance Of Querying MySQL With The CRC Index
 ```
 mysql> explain select url from crcurls where url_crc=1076669273 AND url="9oxigfyv1n.bradul.creatory.org";
 +----+-------------+---------+------------+------+---------------+---------+---------+-------+------+----------+-------------+
