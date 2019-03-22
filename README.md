@@ -44,26 +44,26 @@ The filters are chained together, and are accessed one after the other, as neces
 
 ## Filters
 ### Fake
-***Use:*** Add "fake" to the ["filters" config list](configs/sample-config-defaults.json#L4).
+***Use:*** Add "fake" to the ["filters"](configs/sample-config-defaults.json#L4) config list.
 
-This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;). The next filter in the chain is ignored.
+This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;). The next filter in the chain is ignored. This was implemented mostly as a tool to facilitate setting up the basic server/handler implementations.
 
 ### Redis
-***Use:*** Add "redis" to the ["redis" config list](configs/sample-config-defaults.json#L4). Configure the ["redis"](configs/sample-config-defaults.json#L7) section of the config for your Redis instance.
+***Use:*** Add "redis" to the ["redis"](configs/sample-config-defaults.json#L4) config list. Configure the ["redis"](configs/sample-config-defaults.json#L7) section of the config for your Redis instance.
 
 A Redis based filter. This could be local or remote. It would be possible to run even a distributed collection of *urlfilter* workers against a single Redis cluster. This might be a totally sufficient setup, but you'd need to load test it, evaluate latency characteristics, etc.
 
-If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set on Redis config to control the cache behavior.
+If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set in the Redis ["config"](configs/sample-config-defaults.json#L13) list to control the cache behavior.
 
 ### MySQL
-***Use:*** Add "mysql" to the ["filters" config list](configs/sample-config-defaults.json#L4). Configure the ["mysql"](configs/sample-config-defaults.json#L16) section of the config for your MySQL instance.
+***Use:*** Add "mysql" to the ["filters"](configs/sample-config-defaults.json#L4) config list. Configure the ["mysql"](configs/sample-config-defaults.json#L16) section of the config for your MySQL instance.
 
 MySQL based filter. This can also be configured as a cache, however it makes more sense as the final stop in the filter chain.
 
-The URL itself is not used as an index, rather a CRC of the URL is computed and stored as the index. This way when searching for a given URL in the database the row is found using an integer based key. Even if there are collisions they should be relatively infrequent. I've implemented this with CRC32, but it would be worth loading real data and measuring the frequency and depth of collisions. It may be worth using CRC64 or another hash all together.
+The URL itself is not used as an index, rather a CRC of the URL is computed and stored as the index. This way when searching for a given URL in the database the row is found using an integer based key. Even if there are collisions they should be relatively infrequent, and only result in a couple rows of traversal. I've implemented this with CRC32, but it would be worth loading real data and measuring the frequency and depth of collisions. It may be worth using CRC64 or another hash all together.
 
 ### Bloom Filter
-***Use:*** Add "redismysqlbloom" to the ["filters" config list](configs/sample-config-defaults.json#L4). Configure the ["redismysqlbloom"](configs/sample-config-defaults.json#L16) section of the config, including the nested ["redis"](configs/sample-config-defaults.json#L23) and ["mysql"](configs/sample-config-defaults.json#L32) sections.
+***Use:*** Add "redismysqlbloom" to the ["filters"](configs/sample-config-defaults.json#L4) config list. Configure the ["redismysqlbloom"](configs/sample-config-defaults.json#L16) section of the config, including the nested ["redis"](configs/sample-config-defaults.json#L23) and ["mysql"](configs/sample-config-defaults.json#L32) sections.
 
 A Redis based [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter). This should be used as the first filter in the chain, or the benefit is lost. Additionally it can not be the last filter in the chain.
 
@@ -76,13 +76,13 @@ The default behavior is to check for new data every one minute. This can be conf
 The Bloom Filter is configured for 1000000 items out of the box, this can be changed through the config file.
 
 ## Default Configuration
-The "default" configuration I have settled on, and packaged with Docker Compose, is **Bloom Filter->Redis Cache->MySQL**. We can quickly find out if a URL has not been flagged. However if it is found in the Bloom Filter we then check the Redis Cache, if it's there we can return. If it's not there then we need to check MySQL. This si the final stop and will provide the answer returned to the client. On the way back the URL will be inserted into the Redis Cache.
+The "default" configuration I have settled on, and packaged with Docker Compose, is **Bloom Filter->Redis Cache->MySQL**. We can quickly find out if a URL has not been flagged. However if it is found in the Bloom Filter we then check the Redis Cache, if it's there we can return. If it's not there then we need to check MySQL. This is the final stop and will provide the answer returned to the client. On the way back the URL will be inserted into the Redis cache.
 
 This addresses several of the stated questions/requirements:
 
 1. **The size of the URL list could grow infinitely, how might you scale this beyond the memory capacity of the system.**
 
-   The Bloom Filter has a relatively small memory footprint even for a large set of data. The Redis cache can then be tuned appropriately. The backing MySQL instance can be whatever it needs to be to support the data set.
+   The Bloom Filter has a relatively small memory footprint even for a large set of data. The Redis cache can then be tuned appropriately. The backing MySQL instance can be whatever it needs to be to support the data set. It's possible that MySQL is not the best tool even for the master data store. The benefit of the Filter Chain is that something else could be implemented without a tonne of effort.
 
    If it was found that a backing Redis cluster was the way to go, this could similarly be built out however large was deemed necessary.
 
@@ -132,8 +132,6 @@ Passing -d to the up command causes the containers to run in the background. If 
 Stop will stop the containers, down will remove them.
 
 The data will persist until you run the docker volume command.
-
-Run the following from the root urlfilter directory where the docker-compose.yaml file is found.
 ```
 docker-compose up [-d]
 ...
@@ -155,7 +153,7 @@ docker volume rm $(docker volume ls -q)
 [Redis Quickstart](https://redis.io/topics/quickstart)
 
 # Populate Some Data
-Run the following with the docker-compose containers up and running. This will take the domains and add 0-5 path components, and 0-3 query components. It will populate more than 26k urls. It spams the console so you know what to test with. It uses a domain list from [http://mirror1.malwaredomains.com/files/domains.txt](http://mirror1.malwaredomains.com/files/domains.txt) and then adds 0-5 path components, and 0-3 query components generated with [github.com/tjarratt/babble](github.com/tjarratt/babble).
+Run the following with the docker-compose containers up and running. This will take the domains and add 0-5 path components, and 0-3 query components. It will populate more than 26k urls. It spams the console so you know what to test with. It uses a domain list from [http://mirror1.malwaredomains.com/files/domains.txt](http://mirror1.malwaredomains.com/files/domains.txt) and then the path and query components are generated with [github.com/tjarratt/babble](github.com/tjarratt/babble).
 ```
 go run mysqlloader/mysqlloader.go --config=configs/mysql-loader.json --list mysqlloader/domains-only.txt -mpdepth 5 -mqdepth 3
 ```
@@ -226,8 +224,13 @@ ok  	github.com/tmortimer/urlfilter/server	0.016s	coverage: 80.0% of statements
 In no particular order.
 
 1. Integration tests
-2. The mechanism discussed above to do the data loading
-3. Proper logging
-4. Metrics/statistics collection and reporting
-5. Proper error handling and reporting
+2. Better test coverage, particularly around the connectors
+3. The mechanism discussed above to do the data loading
+4. Proper logging
+5. Metrics/statistics collection and reporting
+6. Proper error handling and reporting
+7. Real load testing of different configurations
+8. Proper evaluation of the ultimate backing data store, maybe MySQL isn't the thing
 
+# After Thoughts
+It occured to me that another approach to sharing the load and the data would be to shard the backend storage/requests based on the data, rather than having all workers handle all requests. This gets trickier as far as routing/managing the sharding, but changes the requirements around loading and backing data stores.

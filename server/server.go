@@ -19,7 +19,7 @@ func Run(handlers []handlers.Handler, s HTTPServer) {
 	}
 
 	// ListenAndServe launches a goroutine for each connection,
-	// so no additional handling necessary to get some concurrency.git
+	// so no additional handling necessary to get some concurrency.
 	err := s.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
