@@ -40,23 +40,34 @@ My intuition is that you would actually want to completely break-up the URL so t
 ## The Design
 I've implemented a configurable Filter Chain so that different storage and retrieval techniques could be evaluated. Full disclosure I didn't evaluate them, I picked what seemed the most complete and flexible. In the real world you would need to collect or estimate load patterns and run load tests against different configurations.
 
-The filters are chained together, and are accessed one after the other, as necessary to figure out if a URL is flagged. Please see each filter type for more details about how they can fit into the chain.
+The filters are chained together, and are accessed one after the other, as necessary to figure out if a URL is flagged. Please see each filter type for more details about how they can fit into the chain. Filters are called in the order they appear in the list.
 
 ## Filters
 ### Fake
-This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;).
+***Use:*** Add "fake" to the ["filters" config list](configs/sample-config-defaults.json#L5).
+
+This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;). The next filter in the chain is ignored.
 
 ### Redis
+***Use:*** Add "redis" to the ["redis" config list](configs/sample-config-defaults.json#L5).
+           Configure the ["redis"](configs/sample-config-defaults.json#L7) section of the config for your Redis instance.
+
 A Redis based filter. This could be local or remote. It would be possible to run even a distributed collection of *urlfilter* workers against a single Redis cluster. This might be a totally sufficient setup, but you'd need to load test it, evaluate latency characteristics, etc.
 
-If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set as Redis config to control the cache behavior.
+If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set on Redis config to control the cache behavior.
 
 ### MySQL
+***Use:*** Add "mysql" to the ["filters" config list](configs/sample-config-defaults.json#L5).
+           Configure the ["mysql"](configs/sample-config-defaults.json#L16) section of the config for your MySQL instance.
+
 MySQL based filter. This can also be configured as a cache, however it makes more sense as the final stop in the filter chain.
 
 The URL itself is not used as an index, rather a CRC of the URL is computed and stored as the index. This way when searching for a given URL in the database the row is found using an integer based key. Even if there are collisions they should be relatively infrequent. I've implemented this with CRC32, but it would be worth loading real data and measuring the frequency and depth of collisions. It may be worth using CRC64 or another hash all together.
 
 ### Bloom Filter
+***Use:*** Add "redismysqlbloom" to the ["filters" config list](configs/sample-config-defaults.json#L5).
+           Configure the ["edismysqlbloom"](configs/sample-config-defaults.json#L16) section of the config, including the nested ["redis"](configs/sample-config-defaults.json#L23) and ["mysql"](configs/sample-config-defaults.json#L32) sections.
+
 A Redis based [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter). This should be used as the first filter in the chain, or the benefit is lost. Additionally it can not be the last filter in the chain.
 
 The idea behind a bloom filter is that you can test for existance in an arbitrarily large set of data, without consuming an arbitrarily large amount of memory. Bloom Filters will generate false positives, that means if it's found in the Bloom Filter the next filter in the chain should be checked. They do not however generate false negatives. If a URL is not found in the Bloom Filter, that result can be returned directly.
@@ -95,6 +106,8 @@ This addresses several of the stated questions/requirements:
    Alternatively I would actually have the data loading process generate a new Bloom Filter locally and then the push it out to the workers triggering the update to the new data. This has the added bonus of easily changing the parameters of the Bloom Filter as the data set grows.
 
 ## Available Config Options
+Only config options you need to change need to be specified in the file.
+
 [Sample Config File With Defauls](configs/sample-config-defaults.json)
 
 [Bloom-Redis-MySQL Config Used For Docker Compose Execution](configs/bloom-redis-mysql.json)
