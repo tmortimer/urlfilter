@@ -80,8 +80,8 @@ func TestHandlesBlockedURL(t *testing.T) {
 		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
 	}
 
-	if recorder.Code != http.StatusLocked {
-		t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
+	if recorder.Code != http.StatusForbidden {
+		t.Errorf("The filterHandler function %s when Forbidden was expected.", http.StatusText(recorder.Code))
 	}
 }
 
@@ -132,7 +132,7 @@ func TestHandlesErrorURLFound(t *testing.T) {
 		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
 	}
 
-	if recorder.Code != http.StatusLocked {
-		t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
+	if recorder.Code != http.StatusForbidden {
+		t.Errorf("The filterHandler function %s when Forbidden was expected.", http.StatusText(recorder.Code))
 	}
 }

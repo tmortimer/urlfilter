@@ -38,7 +38,7 @@ type Bloom struct {
 	ready int32
 
 	// Timer for refreshing the Bloom Filter and picking up new entries.
-
+	ticker *time.Ticker
 }
 
 // Return a new database filter.
@@ -51,13 +51,14 @@ func NewBloom(conn connectors.Connector, loader connectors.Loader, pageLoadSize 
 		lastIdLoaded:     0,
 		numURLs:          0,
 		ready:            0,
+		ticker:           time.NewTicker(time.Duration(pageLoadInterval) * time.Minute),
 	}
 
 	go func() {
 		bloom.Load()
 		atomic.StoreInt32(&(bloom.ready), 1)
 
-		for _ = range time.Tick(bloom.pageLoadInterval * time.Minute) {
+		for _ = range bloom.ticker.C {
 			bloom.Load()
 		}
 	}()
@@ -91,6 +92,11 @@ func (b *Bloom) Load() {
 	log.Printf("The Bloom Filter loaded %d urls for a total of %d.", count, b.numURLs)
 }
 
+// Stop the Bloom Filter's background loading task.
+func (b *Bloom) StopLoading() {
+	b.ticker.Stop()
+}
+
 // Add a secondary filter. Required for Bloom Filters.
 func (b *Bloom) AddSecondaryFilter(filter Filter) error {
 	if filter == nil {
@@ -113,7 +119,7 @@ func (b *Bloom) ContainsURL(url string) (bool, error) {
 	}
 
 	found, err := b.conn.ContainsURL(url)
-	if found || err != nil{
+	if found || err != nil {
 		if err == nil {
 			log.Printf("URL %s found in %s Bloom Filter, checking the next filter.", url, b.conn.Name())
 		} else {
