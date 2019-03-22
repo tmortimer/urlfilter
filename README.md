@@ -4,7 +4,7 @@ REST service to filter malicious URLs.
 [![GoDoc](https://godoc.org/github.com/tmortimer/urlfilter?status.svg)](https://godoc.org/github.com/tmortimer/urlfilter)
 
 ## The Basics
-The application accepts requests against **/urlinfo/1/somefull.url.com/here?query=string** and returns **200-OK** if they are safe to visit and **403-Forbidden** if the URL has been flagged and should not be visited. It is a standard Golang application that can be executed from it's project folder by running **go run urlfilter.go --config=configs/bloom-redis-mysql.json**, hower it is simplest to run this with [Docker Compose](#Docker Compose)
+The application accepts requests against **/urlinfo/1/somefull.url.com/here?query=string** and returns **200-OK** if they are safe to visit and **403-Forbidden** if the URL has been flagged and should not be visited. It is a standard Golang application that can be executed from it's project folder by running **go run urlfilter.go --config=configs/bloom-redis-mysql.json**, hower it is simplest to run this with Docker Compose.
 
 ### Notes About The API
 The requirements stated *"The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service."*.
@@ -14,7 +14,7 @@ Based on this I kept the API as simple as possible. It may be that additional in
 A separate endpoint, or even service, could provide additional information where necessary.
 
 ### Notes About The URL Format
-After an initial question about query strings I decided to handle the URL passed in verbatim. It's very possible/likely that in the real world this would be insufficient. Based on how I set up the Filter Chain (more on this later) one could add a filter to the front of the chain which sanitizes the URL, ie: consistently removes *www.*.
+After an initial question about query strings I decided to handle the URL passed in verbatim. It's very possible/likely that in the real world this would be insufficient. Based on how I set up the Filter Chain (more on this later) one could add a filter to the front of the chain which sanitizes the URL, ie: consistently removes *www.*, switches to all lower case, adds or removes trailing slashes, etc.
 
 Additionally the query strings are likely to change order, if not content and format. This could be handled by breaking them up and handling them separately from the URL.
 
@@ -22,6 +22,60 @@ My intuition is that you would actually want to completely break-up the URL so t
 
 ## The Design
 I've implemented a configurable Filter Chain so that different storage and retrieval techniques could be evaluated. Full disclosure I didn't evaluate them, I picked what seemed the most complete and flexible. In the real world you would need to collect or estimate load patterns and run load tests against different configurations.
+
+The filters are chained together, and are accessed one after the other, as necessary to figure out if a URL is flagged. Please see each filter type for more details about how they can fit into the chain.
+
+## Filters
+### Fake
+This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;).
+
+### Redis
+A Redis based filter. This could be local or remote. It would be possible to run even a distributed collection of *urlfilter* workers against a single Redis cluster. This might be a totally sufficient setup, but you'd need to load test it, evaluate latency characteristics, etc.
+
+If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set as Redis config to control the cache behavior.
+
+### MySQL
+MySQL based filter. This can also be configured as a cache, however it makes more sense as the final stop in the filter chain.
+
+The URL itself is not used as an index, rather a CRC of the URL is computed and stored as the index. This way when searching for a given URL in the database the row is found using an integer based key. Even if there are collisions they should be relatively infrequent. I've implemented this with CRC32, but it would be worth loading real data and measuring the frequency and depth of collisions. It may be worth using CRC64 or another hash all together.
+
+### Bloom Filter
+A Redis based [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter). This should be used as the first filter in the chain, or the benefit is lost. Additionally it can not be the last filter in the chain.
+
+The idea behind a bloom filter is that you can test for existance in an arbitrarily large set of data, without consuming an arbitrarily large amount of memory. Bloom Filters will generate false positives, that means if it's found in the Bloom Filter the next filter in the chain should be checked. They do not however generate false negatives. If a URL is not found in the Bloom Filter, that result can be returned directly.
+
+The Bloom Filter is bypassed until initial data loading is complete. Currently the only supported method of data loading is from MySQL.
+
+The default behavior is to check for new data every one minute. This can be configured. Until new data is loaded into the Bloom Filter, it's as if the data is not present in the DB either, it will still return not found.
+
+The Bloom Filter is configured for 1000000 items out of the box, this can be changed through the config file.
+
+## Default Configuration
+The "default" configuration I have settled on, and packaged with Docker Compose, is **Bloom Filter->Redis Cache->MySQL**. We can quickly find out if a URL has not been flagged. However if it is found in the Bloom Filter we then check the Redis Cache, if it's there we can return. If it's not there then we need to check MySQL. This si the final stop and will provide the answer returned to the client. On the way back the URL will be inserted into the Redis Cache.
+
+This addresses several of the stated questions/requirements:
+
+1. The size of the URL list could grow infinitely, how might you scale this beyond the memory capacity of the system.
+
+   The Bloom Filter has a relatively small memory footprint even for a large set of data. The Redis cache can then be tuned appropriately. The backing MySQL instance can be whatever it needs to be to support the data set.
+
+   If it was found that a backing Redis cluster was the way to go, this could similarly be built out however large was deemed necessary.
+
+2. Assume that the number of requests will exceed the capacity of a single system, describe how might you solve this, and how might this change if you have to distribute this workload over geographic regions.
+
+   With a shared back end, be it Redis, MySQL, or otherwise workers can be scaled as necessary. From there they would be placed behind a load balancer, software or hardware based. Even inside a large Kubernetes deployment. Both Redis and MySQL support multi-site deployments so distributed geographic regions would be handled that way.
+
+   As the Bloom Filter is bypassed until it's loaded the existing data there's no concern about inconsistant results if that's the head of your chain. There would be some additional hurdles with updating Bloom Filters on an army of workers to keep them in sync, but that will be addressed below.
+
+3. What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.
+
+   Given the time frame I stopped short of implementing this, other than the MySQL loader necessary for testing. I would keep the URL loading separate from the main application. Data would be loaded into whatever the final data store is, Redis or MySQL, singular or distributed.
+
+   The catch here is an army of workers with their own Bloom Filters. A Redis based Bloom Filter could be shared, but let's assume the Bloom Filter needs to be local to the worker. Having them all update at their own cadence would introduce inconsistent results.
+
+   This could be addressed by routing traffic based on it's source, rather than in a sequential round robin fashion. IE the same client always hits the same worker. This may be needlessly complex and inflexible if workers go down etc.
+
+   Alternatively I would actually have the data loading process generate a new Bloom Filter locally and then the push it out to the workers triggering the update to the new data. This has the added bonus of easily changing the parameters of the Bloom Filter as the data set grows.
 
 # Requirements
 ## Golang
