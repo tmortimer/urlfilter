@@ -1,9 +1,0 @@
-{
-	"filters": [
-		"redis"
-	],
-	"redis":{
-		"host":"urlfilter-redis-only-redis",
-		"port":"6379"
-	}
-}

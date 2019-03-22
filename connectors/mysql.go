@@ -32,6 +32,10 @@ const SELECT_URL = "SELECT EXISTS(SELECT 1 FROM crcurls WHERE url_crc=? AND url=
 
 const ADD_URL = "INSERT INTO crcurls (url_crc, url) VALUES (?, ?)"
 
+const SELECT_RANGE = "SELECT id, url FROM crcurls WHERE id BETWEEN ? AND ?"
+
+const SELECT_MAX_ID = "SELECT IFNULL(MAX(id), 0) FROM crcurls"
+
 // Holds the MySQL connection pool and executes commands against MySQL.
 type MySQL struct {
 	// MySQL connection pool.
@@ -109,4 +113,44 @@ func (r *MySQL) AddURL(url string) error {
 // Return the name MySQL for logging.
 func (r *MySQL) Name() string {
 	return "MySQL"
+}
+
+func (r *MySQL) GetURLPage(start int, number int) ([]string, int, error) {
+
+	rows, err := r.db.Query(SELECT_RANGE, start, start+number-1)
+	if err != nil {
+		return nil, start, err
+	}
+	defer rows.Close()
+
+	urls := make([]string, 0, number)
+	url := ""
+	maxID := 0
+	i := 0
+	for rows.Next() {
+		err := rows.Scan(&maxID, &url)
+		if err != nil {
+			return nil, start, err
+		}
+		urls = append(urls, url)
+		i++
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, start, err
+	}
+
+	return urls, maxID, nil
+}
+
+func (r *MySQL) GetMaxID() (int, error) {
+	maxID := 0
+
+	row := r.db.QueryRow(SELECT_MAX_ID)
+	if err := row.Scan(&maxID); err != nil {
+		return 0, err
+	}
+
+	return maxID, nil
 }

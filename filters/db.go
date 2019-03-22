@@ -23,8 +23,9 @@ func NewDB(conn connectors.Connector) *DB {
 }
 
 // Add a secondary filter. Necessary if using this DB as a cache.
-func (d *DB) AddSecondaryFilter(filter Filter) {
+func (d *DB) AddSecondaryFilter(filter Filter) error {
 	d.next = filter
+	return nil
 }
 
 // Return true if the URL is found in the Database. If it's not then return false

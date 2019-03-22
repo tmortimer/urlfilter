@@ -1,10 +1,17 @@
 package connectors
 
 import (
+	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/tmortimer/urlfilter/config"
+	"strings"
 	"time"
 )
+
+const BF_NAME string = "URLFilter"
+
+type ContainsFunc func(url string) (bool, error)
+type AddFunc func(url string) error
 
 // Holds the actual Redis connection pool and executes commands against Redis.
 type Redis struct {
@@ -13,10 +20,16 @@ type Redis struct {
 
 	// Redis specific config.
 	config config.Redis
+
+	// Function to check for existance of a URL.
+	contains ContainsFunc
+
+	// Function to add a URL.
+	add AddFunc
 }
 
 // Create a new Redis connector and setup the Redis connection pool.
-func NewRedis(config config.Redis) *Redis {
+func NewRedisBase(config config.Redis) *Redis {
 	connector := &Redis{
 		config: config,
 	}
@@ -31,10 +44,57 @@ func NewRedis(config config.Redis) *Redis {
 	return connector
 }
 
+// Create a new Redis connector.
+func NewRedis(config config.Redis) *Redis {
+	connector := NewRedisBase(config)
+	connector.SetAccessors(false)
+	return connector
+}
+
+// Create a new Redis Bloom Filter connector.
+func NewRedisBloom(config config.Redis) *Redis {
+	connector := NewRedisBase(config)
+	connector.SetAccessors(true)
+	return connector
+}
+
+// Setup the functions used to check if URLs exist, and add them.
+// These change if this Redis connector is being used as for a
+// Bloom Filter.
+func (r *Redis) SetAccessors(bloom bool) {
+	if bloom {
+		r.contains = func(url string) (bool, error) {
+			return redis.Bool(r.Do("BF.EXISTS", BF_NAME, url))
+		}
+		r.add = func(url string) error {
+			_, err := r.Do("BF.ADD", BF_NAME, url)
+			return err
+		}
+	} else {
+		r.contains = func(url string) (bool, error) {
+			return redis.Bool(r.Do("EXISTS", url))
+		}
+		r.add = func(url string) error {
+			_, err := r.Do("SET", url, "\"\"")
+			return err
+		}
+	}
+}
+
 // Configure Redis based on the supplied config file.
 func (r *Redis) ConfigureRedis() {
 	for _, command := range r.config.Config {
-		r.Do(command)
+		parts := strings.Split(command, " ")
+		cmd := parts[0]
+		sargs := parts[1:len(parts)]
+		args := make([]interface{}, len(sargs))
+		for i, arg := range sargs {
+			args[i] = arg
+		}
+		_, err := r.Do(cmd, args...)
+		if err != nil {
+			fmt.Printf("Failed to set the following Redis config: %s - %s.\n", command, err)
+		}
 	}
 }
 
@@ -48,7 +108,7 @@ func (r *Redis) Do(cmd string, keysAndArgs ...interface{}) (interface{}, error) 
 
 // Check if the URL is in Redis.
 func (r *Redis) ContainsURL(url string) (bool, error) {
-	found, err := redis.Bool(r.Do("EXISTS", url))
+	found, err := r.contains(url)
 	if err != nil {
 		// Not sure what the state of found will be after a failed
 		// call to the Redis library, so be sure it's false.
@@ -61,9 +121,7 @@ func (r *Redis) ContainsURL(url string) (bool, error) {
 // Add the URL to the Redis. Only used if this DB is being used as a cache.
 func (r *Redis) AddURL(url string) error {
 	// Use "" as the value since we only care about the key.
-	_, err := r.Do("SET", url, "\"\"")
-
-	return err
+	return r.add(url)
 }
 
 // Return the name Redis for logging.

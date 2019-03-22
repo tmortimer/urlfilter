@@ -19,7 +19,11 @@ func FilterFactory(config *config.Config) (Filter, error) {
 			return nil, err
 		}
 
-		current.AddSecondaryFilter(filter)
+		err = current.AddSecondaryFilter(filter)
+		if err != nil {
+			return nil, err
+		}
+
 		filter = current
 	}
 
@@ -39,6 +43,14 @@ func CreateFilter(name string, config *config.Config) (Filter, error) {
 			return nil, err
 		}
 		return NewDB(connector), nil
+	case "redismysqlbloom":
+		loader, err := connectors.NewMySQL(config.RedisMySQLBloom.MySQL)
+		if err != nil {
+			return nil, err
+		}
+		return NewBloom(
+			connectors.NewRedisBloom(config.RedisMySQLBloom.Redis), loader,
+			config.RedisMySQLBloom.PageLoadSize, config.RedisMySQLBloom.PageLoadInterval), nil
 	}
 
 	return nil, fmt.Errorf("Unknown filter %s", name)

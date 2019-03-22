@@ -59,6 +59,30 @@ func TestNewMySQLDefaults(t *testing.T) {
 	}
 }
 
+func TestNewBloomDefaults(t *testing.T) {
+	bloom := NewRedisMySQLBloom()
+
+	if bloom.PageLoadSize != 1000 {
+		t.Errorf("Bloom.PageLoadSize should be 1000 but was %d.", bloom.PageLoadSize)
+	}
+
+	if bloom.PageLoadInterval != 1 {
+		t.Errorf("Bloom.PageLoadInterval should be 1 but was %d.", bloom.PageLoadInterval)
+	}
+
+	redis := NewRedis()
+	if !cmp.Equal(bloom.Redis, redis) {
+		t.Error("The default bloom config options had non-default Redis config.")
+		t.Error(cmp.Diff(bloom.Redis, redis))
+	}
+
+	mysql := NewMySQL()
+	if !cmp.Equal(bloom.MySQL, mysql) {
+		t.Error("The default bloom config options had non-default MySQL config.")
+		t.Error(cmp.Diff(bloom.MySQL, mysql))
+	}
+}
+
 func TestNewConfig(t *testing.T) {
 	config := NewConfig()
 
@@ -78,6 +102,18 @@ func TestNewConfig(t *testing.T) {
 	if !cmp.Equal(config.Redis, redis) {
 		t.Error("The default config options had non-default Redis config.")
 		t.Error(cmp.Diff(config.Redis, redis))
+	}
+
+	mysql := NewMySQL()
+	if !cmp.Equal(config.MySQL, mysql) {
+		t.Error("The default config options had non-default MySQL config.")
+		t.Error(cmp.Diff(config.MySQL, mysql))
+	}
+
+	bloom := NewRedisMySQLBloom()
+	if !cmp.Equal(config.RedisMySQLBloom, bloom) {
+		t.Error("The default config options had non-default Bloom config.")
+		t.Error(cmp.Diff(config.RedisMySQLBloom, bloom))
 	}
 }
 
@@ -99,6 +135,20 @@ func TestParseConfig(t *testing.T) {
 	config.MySQL.Port = "444"
 	config.MySQL.Username = "used"
 	config.MySQL.Password = "Changeme"
+
+	config.RedisMySQLBloom.PageLoadSize = 66
+	config.RedisMySQLBloom.PageLoadInterval = 6
+	config.RedisMySQLBloom.Redis.Host = "google.ca"
+	config.RedisMySQLBloom.Redis.Port = "444"
+	config.RedisMySQLBloom.Redis.Password = "Changeme"
+	config.RedisMySQLBloom.Redis.MaxIdle = 100
+	config.RedisMySQLBloom.Redis.IdleTimeout = 4
+	config.RedisMySQLBloom.Redis.Config = []string{"run some things"}
+	config.RedisMySQLBloom.Redis.InsertChunkSize = 1
+	config.RedisMySQLBloom.MySQL.Host = "google.ca"
+	config.RedisMySQLBloom.MySQL.Port = "444"
+	config.RedisMySQLBloom.MySQL.Username = "used"
+	config.RedisMySQLBloom.MySQL.Password = "Changeme"
 
 	configBytes, err := json.Marshal(config)
 	if err != nil {

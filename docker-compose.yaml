@@ -1,0 +1,49 @@
+version: "2"
+
+services:
+  bloom-redis-mysql:
+    image: golang:latest
+    volumes:
+      - .:/go/src/github.com/tmortimer/urlfilter
+    working_dir: /go/src/github.com/tmortimer/urlfilter
+    depends_on:
+      - bloom-redis-mysql-redisdb
+      - bloom-redis-mysql-redisbloom
+      - bloom-redis-mysql-mysqldb
+    ports:
+      - 8080:8080
+    command: >
+      sh -c "go get ./...
+             go run urlfilter.go --config=configs/bloom-redis-mysql.json"
+
+  bloom-redis-mysql-redisdb:
+    image: redislabs/rebloom:latest
+    ports:
+      - 6380:6380
+    volumes:
+      - redis_data:/data
+    command: redis-server --port 6380
+
+  bloom-redis-mysql-redisbloom:
+    image: redislabs/rebloom:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_bloom_data:/data
+
+  bloom-redis-mysql-mysqldb:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: 'URLFilter'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql:/var/lib/mysql
+
+volumes:
+  redis_data:
+  redis_bloom_data:
+  mysql:

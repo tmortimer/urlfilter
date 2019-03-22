@@ -12,8 +12,9 @@ type TestFilter struct {
 	called int
 }
 
-func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) {
+func (f *TestFilter) AddSecondaryFilter(filter filters.Filter) error {
 	f.next = filter
+	return nil
 }
 
 func (f *TestFilter) ContainsURL(url string) (bool, error) {
@@ -79,8 +80,8 @@ func TestHandlesBlockedURL(t *testing.T) {
 		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
 	}
 
-	if recorder.Code != http.StatusLocked {
-		t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
+	if recorder.Code != http.StatusForbidden {
+		t.Errorf("The filterHandler function %s when Forbidden was expected.", http.StatusText(recorder.Code))
 	}
 }
 
@@ -131,7 +132,7 @@ func TestHandlesErrorURLFound(t *testing.T) {
 		t.Errorf("The TestFilter ContainsURL function was called %d time(s).", f.called)
 	}
 
-	if recorder.Code != http.StatusLocked {
-		t.Errorf("The filterHandler function %s when Locked was expected.", http.StatusText(recorder.Code))
+	if recorder.Code != http.StatusForbidden {
+		t.Errorf("The filterHandler function %s when Forbidden was expected.", http.StatusText(recorder.Code))
 	}
 }

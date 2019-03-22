@@ -1,47 +1,8 @@
 package filters
 
 import (
-	"errors"
-	"strings"
 	"testing"
 )
-
-type TestConnector struct {
-	db map[string]bool
-}
-
-func NewTestConnector() *TestConnector {
-	connector := &TestConnector{}
-	connector.db = make(map[string]bool)
-
-	return connector
-}
-
-func (t *TestConnector) ContainsURL(url string) (bool, error) {
-	if strings.Contains(url, "merp") {
-		return false, errors.New("Bad things happened!")
-	}
-
-	if strings.Contains(url, "derp") {
-		return true, errors.New("Bad things happened!")
-	}
-
-	return t.db[url], nil
-}
-
-func (t *TestConnector) AddURL(url string) error {
-	if strings.Contains(url, "perm") {
-		return errors.New("Bad things happened!")
-	}
-
-	t.db[url] = true
-
-	return nil
-}
-
-func (t *TestConnector) Name() string {
-	return "Test"
-}
 
 func TestSetsSecondaryFilter(t *testing.T) {
 	db := NewDB(NewTestConnector())
