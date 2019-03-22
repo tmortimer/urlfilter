@@ -44,29 +44,26 @@ The filters are chained together, and are accessed one after the other, as neces
 
 ## Filters
 ### Fake
-***Use:*** Add "fake" to the ["filters" config list](configs/sample-config-defaults.json#L5).
+***Use:*** Add "fake" to the ["filters" config list](configs/sample-config-defaults.json#L4).
 
 This returns that a URL is found if it has "facebook" anywhere in it. This seems like a good thing to block ;). The next filter in the chain is ignored.
 
 ### Redis
-***Use:*** Add "redis" to the ["redis" config list](configs/sample-config-defaults.json#L5).
-           Configure the ["redis"](configs/sample-config-defaults.json#L7) section of the config for your Redis instance.
+***Use:*** Add "redis" to the ["redis" config list](configs/sample-config-defaults.json#L4). Configure the ["redis"](configs/sample-config-defaults.json#L7) section of the config for your Redis instance.
 
 A Redis based filter. This could be local or remote. It would be possible to run even a distributed collection of *urlfilter* workers against a single Redis cluster. This might be a totally sufficient setup, but you'd need to load test it, evaluate latency characteristics, etc.
 
 If there are more filters after the Redis based filter, this will work like a cache. If it's not found it will check the next filter down the line. If implemented as a cache **maxmemory** and **maxmemory-policy** should probably be set on Redis config to control the cache behavior.
 
 ### MySQL
-***Use:*** Add "mysql" to the ["filters" config list](configs/sample-config-defaults.json#L5).
-           Configure the ["mysql"](configs/sample-config-defaults.json#L16) section of the config for your MySQL instance.
+***Use:*** Add "mysql" to the ["filters" config list](configs/sample-config-defaults.json#L4). Configure the ["mysql"](configs/sample-config-defaults.json#L16) section of the config for your MySQL instance.
 
 MySQL based filter. This can also be configured as a cache, however it makes more sense as the final stop in the filter chain.
 
 The URL itself is not used as an index, rather a CRC of the URL is computed and stored as the index. This way when searching for a given URL in the database the row is found using an integer based key. Even if there are collisions they should be relatively infrequent. I've implemented this with CRC32, but it would be worth loading real data and measuring the frequency and depth of collisions. It may be worth using CRC64 or another hash all together.
 
 ### Bloom Filter
-***Use:*** Add "redismysqlbloom" to the ["filters" config list](configs/sample-config-defaults.json#L5).
-           Configure the ["edismysqlbloom"](configs/sample-config-defaults.json#L16) section of the config, including the nested ["redis"](configs/sample-config-defaults.json#L23) and ["mysql"](configs/sample-config-defaults.json#L32) sections.
+***Use:*** Add "redismysqlbloom" to the ["filters" config list](configs/sample-config-defaults.json#L4). Configure the ["redismysqlbloom"](configs/sample-config-defaults.json#L16) section of the config, including the nested ["redis"](configs/sample-config-defaults.json#L23) and ["mysql"](configs/sample-config-defaults.json#L32) sections.
 
 A Redis based [Bloom Filter](https://en.wikipedia.org/wiki/Bloom_filter). This should be used as the first filter in the chain, or the benefit is lost. Additionally it can not be the last filter in the chain.
 
@@ -83,19 +80,19 @@ The "default" configuration I have settled on, and packaged with Docker Compose,
 
 This addresses several of the stated questions/requirements:
 
-1. The size of the URL list could grow infinitely, how might you scale this beyond the memory capacity of the system.
+1. **The size of the URL list could grow infinitely, how might you scale this beyond the memory capacity of the system.**
 
    The Bloom Filter has a relatively small memory footprint even for a large set of data. The Redis cache can then be tuned appropriately. The backing MySQL instance can be whatever it needs to be to support the data set.
 
    If it was found that a backing Redis cluster was the way to go, this could similarly be built out however large was deemed necessary.
 
-2. Assume that the number of requests will exceed the capacity of a single system, describe how might you solve this, and how might this change if you have to distribute this workload over geographic regions.
+2. **Assume that the number of requests will exceed the capacity of a single system, describe how might you solve this, and how might this change if you have to distribute this workload over geographic regions.**
 
    With a shared back end, be it Redis, MySQL, or otherwise workers can be scaled as necessary. From there they would be placed behind a load balancer, software or hardware based. Even inside a large Kubernetes deployment. Both Redis and MySQL support multi-site deployments so distributed geographic regions would be handled that way.
 
    As the Bloom Filter is bypassed until it's loaded the existing data there's no concern about inconsistant results if that's the head of your chain. There would be some additional hurdles with updating Bloom Filters on an army of workers to keep them in sync, but that will be addressed below.
 
-3. What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.
+3. **What are some strategies you might use to update the service with new URLs? Updates may be as much as 5 thousand URLs a day with updates arriving every 10 minutes.**
 
    Given the time frame I stopped short of implementing this, other than the MySQL loader necessary for testing. I would keep the URL loading separate from the main application. Data would be loaded into whatever the final data store is, Redis or MySQL, singular or distributed.
 
