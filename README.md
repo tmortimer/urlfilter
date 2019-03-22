@@ -6,6 +6,23 @@ REST service to filter malicious URLs.
 ## The Basics
 The application accepts requests against **/urlinfo/1/somefull.url.com/here?query=string** and returns **200-OK** if they are safe to visit and **403-Forbidden** if the URL has been flagged and should not be visited. It is a standard Golang application that can be executed from it's project folder by running **go run urlfilter.go --config=configs/bloom-redis-mysql.json**, hower it is simplest to run this with Docker Compose.
 
+### Sample Request-Response
+```
+curl 'http://localhost:8080/urlinfo/1/wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism' -v
+*   Trying ::1...
+* TCP_NODELAY set
+* Connected to localhost (::1) port 8080 (#0)
+> GET /urlinfo/1/wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.54.0
+> Accept: */*
+>
+< HTTP/1.1 403 Forbidden
+< Date: Fri, 22 Mar 2019 05:11:21 GMT
+< Content-Length: 0
+<
+```
+
 ### Notes About The API
 The requirements stated *"The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service."*.
 
@@ -76,6 +93,10 @@ This addresses several of the stated questions/requirements:
    This could be addressed by routing traffic based on it's source, rather than in a sequential round robin fashion. IE the same client always hits the same worker. This may be needlessly complex and inflexible if workers go down etc.
 
    Alternatively I would actually have the data loading process generate a new Bloom Filter locally and then the push it out to the workers triggering the update to the new data. This has the added bonus of easily changing the parameters of the Bloom Filter as the data set grows.
+
+## Available Config Options
+[Sample Config File With Defauls](configs/sample-config-defaults.json)
+[Bloom-Redis-MySQL Config Used For Docker Compose Execution](configs/bloom-redis-mysql.json)
 
 # Requirements
 ## Golang
