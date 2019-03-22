@@ -232,5 +232,5 @@ In no particular order.
 7. Real load testing of different configurations
 8. Proper evaluation of the ultimate backing data store, maybe MySQL isn't the thing
 
-# After Thoughts
+# Afterthoughts
 It occured to me that another approach to sharing the load and the data would be to shard the backend storage/requests based on the data, rather than having all workers handle all requests. This gets trickier as far as routing/managing the sharding, but changes the requirements around loading and backing data stores.
