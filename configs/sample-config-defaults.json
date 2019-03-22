@@ -1,0 +1,41 @@
+{
+    "host": "",
+    "port": "8080",
+    "filters": [
+        "redis"
+    ],
+    "redis": {
+        "host": "",
+        "port": "6379",
+        "password": "",
+        "maxIdle": 10,
+        "idleTimeout": 600,
+        "config": null,
+        "insertChunkSize": 1000
+    },
+    "mysql": {
+        "host": "",
+        "port": "3306",
+        "username": "",
+        "password": ""
+    },
+    "redismysqlbloom": {
+        "redis": {
+            "host": "",
+            "port": "6379",
+            "password": "",
+            "maxIdle": 10,
+            "idleTimeout": 600,
+            "config": null,
+            "insertChunkSize": 1000
+        },
+        "mysql": {
+            "host": "",
+            "port": "3306",
+            "username": "",
+            "password": ""
+        },
+        "pageloadsize": 1000,
+        "pageloadinterval": 1
+    }
+}
