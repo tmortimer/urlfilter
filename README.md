@@ -3,6 +3,26 @@ REST service to filter malicious URLs.
 
 [![GoDoc](https://godoc.org/github.com/tmortimer/urlfilter?status.svg)](https://godoc.org/github.com/tmortimer/urlfilter)
 
+## The Basics
+The application accepts requests against **/urlinfo/1/somefull.url.com/here?query=string** and returns **200-OK** if they are safe to visit and **403-Forbidden** if the URL has been flagged and should not be visited. It is a standard Golang application that can be executed from it's project folder by running **go run urlfilter.go --config=configs/bloom-redis-mysql.json**, hower it is simplest to run this with [Docker Compose](#Docker Compose)
+
+### Notes About The API
+The requirements stated *"The caller wants to know if it is safe to access that URL or not. As the implementer you get to choose the response format and structure. These lookups are blocking users from accessing the URL until the caller receives a response from your service."*.
+
+Based on this I kept the API as simple as possible. It may be that additional information is stored and retrievable about any flagged URL, but for the use outlined we're looking for a simple and fast YES or NO. As a result I limited the information to straightforward status codes.
+
+A separate endpoint, or even service, could provide additional information where necessary.
+
+### Notes About The URL Format
+After an initial question about query strings I decided to handle the URL passed in verbatim. It's very possible/likely that in the real world this would be insufficient. Based on how I set up the Filter Chain (more on this later) one could add a filter to the front of the chain which sanitizes the URL, ie: consistently removes *www.*.
+
+Additionally the query strings are likely to change order, if not content and format. This could be handled by breaking them up and handling them separately from the URL.
+
+My intuition is that you would actually want to completely break-up the URL so that you could block entire domains, only specific paths within domains, or only specific paths with specific query strings (not dependant on order). However without actual data and requirements it didn't make sense to pre-maturely tackle this given the timeframe/nature of the project.
+
+## The Design
+I've implemented a configurable Filter Chain so that different storage and retrieval techniques could be evaluated. Full disclosure I didn't evaluate them, I picked what seemed the most complete and flexible. In the real world you would need to collect or estimate load patterns and run load tests against different configurations.
+
 # Requirements
 ## Golang
 [Installing Golang](https://golang.org/doc/install)
@@ -31,7 +51,7 @@ Run the following from the root urlfilter directory where the docker-compose.yam
 ```
 docker-compose up [-d]
 ...
-curl 'http://localhost:8080/urlinfo/1/www.facebook.com:9090/peww/what/who/merp.html?face=ac&w' -v
+curl 'http://localhost:8080/urlinfo/1/wsxzsal8.club/crackle/rebute/perfusion/outspill?rodomontade=reg&scolecophagous=militarism' -v
 ...
 docker-compose logs bloom-redis-mysql
 
