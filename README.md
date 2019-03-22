@@ -3,7 +3,7 @@ REST service to filter malicious URLs.
 
 [![GoDoc](https://godoc.org/github.com/tmortimer/urlfilter?status.svg)](https://godoc.org/github.com/tmortimer/urlfilter)
 
-## The Basics
+# The Basics
 The application accepts requests against **/urlinfo/1/somefull.url.com/here?query=string** and returns **200-OK** if they are safe to visit and **403-Forbidden** if the URL has been flagged and should not be visited. It is a standard Golang application that can be executed from it's project folder by running **go run urlfilter.go --config=configs/bloom-redis-mysql.json**, hower it is simplest to run this with Docker Compose.
 
 ### Sample Request-Response
@@ -37,7 +37,7 @@ Additionally the query strings are likely to change order, if not content and fo
 
 My intuition is that you would actually want to completely break-up the URL so that you could block entire domains, only specific paths within domains, or only specific paths with specific query strings (not dependant on order). However without actual data and requirements it didn't make sense to pre-maturely tackle this given the timeframe/nature of the project.
 
-## The Design
+# The Design
 I've implemented a configurable Filter Chain so that different storage and retrieval techniques could be evaluated. Full disclosure I didn't evaluate them, I picked what seemed the most complete and flexible. In the real world you would need to collect or estimate load patterns and run load tests against different configurations.
 
 The filters are chained together, and are accessed one after the other, as necessary to figure out if a URL is flagged. Please see each filter type for more details about how they can fit into the chain. Filters are called in the order they appear in the list.
@@ -221,3 +221,13 @@ ok  	github.com/tmortimer/urlfilter/handlers	0.015s	coverage: 100.0% of statemen
 ?   	github.com/tmortimer/urlfilter/mysqlloader	[no test files]
 ok  	github.com/tmortimer/urlfilter/server	0.016s	coverage: 80.0% of statements
 ```
+
+# What's Missing?
+In no particular order.
+
+1. Integration tests
+2. The mechanism discussed above to do the data loading
+3. Proper logging
+4. Metrics/statistics collection and reporting
+5. Proper error handling and reporting
+
