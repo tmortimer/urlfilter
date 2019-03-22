@@ -96,6 +96,7 @@ This addresses several of the stated questions/requirements:
 
 ## Available Config Options
 [Sample Config File With Defauls](configs/sample-config-defaults.json)
+
 [Bloom-Redis-MySQL Config Used For Docker Compose Execution](configs/bloom-redis-mysql.json)
 
 # Requirements
